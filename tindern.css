@@ -1,0 +1,147 @@
+/*
+    Document   : tindern.css
+    Created on : 2016-05-30 03:58 PM
+    Author     : billylabufanda
+    Description:
+    Purpose of the stylesheet follows.
+    To change this template use Tools | Templates.
+*/
+ root {
+    display: block;
+}
+@font-face {
+    font-family:'ProximaNova';
+    src: url('/fonts/proximanova_regular/ProximaNova-Reg-webfont.eot');
+    src: url('/fonts/proximanova_regular/ProximaNova-Reg-webfont.eot?iefix') format('eot'), url('/fonts/proximanova_regular/ProximaNova-Reg-webfont.woff') format('woff'), url('/fonts/proximanova_regular/ProximaNova-Reg-webfont.ttf') format('truetype'), font-weight: normal;
+    font-style: normal;
+}
+.mainpage {
+    background-color: #3fb0ac;
+}
+#mainpage1 {
+    background-color: #3fb0ac;
+    /*background-color: #cce6ff;*/
+    text-align:center;
+    padding:5px;
+}
+.navbar-default {
+    background-color: #F8F8F8;
+    border-color: #E7E7E7;
+}
+#header {
+    color:black
+}
+#InternshipCardandFilters {
+    display: flex;
+}
+#InternshipCard {
+    border-radius: 10px 10px 10px 10px;
+    -moz-border-radius: 10px 10px 10px 10px;
+    -webkit-border-radius: 10px 10px 10px 10px;
+    padding: 1.5vh 1vw 1.5vh 1vw;
+    /*background-color:#80c1ff;*/
+    background-color: #dddfd4;
+    line-height: 10vh;
+    font-size: 3.5vh;
+    font-family:Impact, Charcoal, sans-serif;
+    height: 100%;
+    float:left;
+    position:relative;
+    text-align: left;
+    border-style:hidden;
+    border-width: 100px;
+    height: 65vh;
+    margin-left: 2vw;
+}
+#InternshipFilters {
+    border-radius: 10px 10px 10px 10px;
+    -moz-border-radius: 10px 10px 10px 10px;
+    -webkit-border-radius: 10px 10px 10px 10px;
+    /*background-color:#80c1ff;*/
+    background-color: #dddfd4;
+    font-size: 3vh;
+    font-family:Impact, Charcoal, sans-serif;
+    text-align: left;
+    line-height: 5vh;
+    border-style:hidden;
+    border-width: 100vw;
+}
+#buttons {
+    display:flex;
+}
+#nextInternshipButton {
+    -webkit-border-radius: 28;
+    -moz-border-radius: 28;
+    border-radius: 28px;
+    font-family: Arial;
+    color: black;
+    font-size: 20px;
+    background: #dddfd4;
+    text-decoration: none;
+    padding: 10px 20px 10px 20px;
+    text-decoration: none;
+    text-align: center;
+    margin-top:5vh;
+    float:left;
+    border-style:hidden;
+    border-width: 100px;
+    margin-left: 2vw;
+}
+#nextInternshipButton:hover {
+    background: #e8e9e2;
+    text-decoration: none;
+}
+#saveInternshipButton {
+    -webkit-border-radius: 28;
+    -moz-border-radius: 28;
+    border-radius: 28px;
+    font-family: Arial;
+    color: black;
+    font-size: 20px;
+    background: #dddfd4;
+    padding: 10px 20px 10px 20px;
+    text-decoration: none;
+    padding: 10px 20px 10px 20px;
+    text-decoration: none;
+    text-align: center;
+    margin-top:5vh;
+    float:right;
+    border-style:hidden;
+    border-width: 100px;
+    margin-left: 2vw;
+    margin-right: 2vw;
+}
+#saveInternshipButton:hover {
+    background: #e8e9e2;
+    text-decoration: none;
+}
+#placeholderButton{
+        -webkit-border-radius: 28;
+    -moz-border-radius: 28;
+    border-radius: 28px;
+    font-family: Arial;
+    color: black;
+    font-size: 20px;
+    background: #dddfd4;
+    padding: 10px 20px 10px 20px;
+    text-decoration: none;
+    padding: 10px 20px 10px 20px;
+    text-decoration: none;
+    text-align: center;
+    margin-top:5vh;
+    float:right;
+    border-style:hidden;
+    border-width: 100px;
+    margin-left: 2vw;
+    margin-right: 2vw;
+}
+#placeholderButton:hover {
+    background: #e8e9e2;
+    text-decoration: none;
+}
+#footer {
+    color:black;
+    clear:both;
+    text-align:center;
+    padding:1vh;
+}
