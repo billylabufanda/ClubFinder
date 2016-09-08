@@ -217,15 +217,22 @@ var returnSavedInternshipPageBackToRegularInternshipsBoolean = true
             }
         }
     }
-  function goGoGoogle() {
-      gapi.signin2.render('google-signin-button', {
-                'scope': 'profile email',
-        'width': 240,
-        'height': 50,
-        'longtitle': true,
-        'theme': 'dark',
-        'onsuccess': onSuccess,
-        'onfailure': onFailure
-      });
-      console.log('did it go?');
-    }
+    
+function onSuccess(googleUser) {
+  console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
+}
+function onFailure(error) {
+  console.log(error);
+}
+function goGoGoogle() {
+  gapi.signin2.render('google-signin-button', {
+    'scope': 'profile email',
+    'width': 240,
+    'height': 50,
+    'longtitle': true,
+    'theme': 'dark',
+    'onsuccess': onSuccess,
+    'onfailure': onFailure
+  });
+  console.log('did it go?');
+}
