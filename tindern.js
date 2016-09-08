@@ -223,6 +223,7 @@ var returnSavedInternshipPageBackToRegularInternshipsBoolean = true
     
 function onSuccess(googleUser) {
   console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
+  var profile = googleUser.getBasicProfile();
   console.log('Name: ' + profile.getName());
   console.log('Image URL: ' + profile.getImageUrl());
   console.log('Email: ' + profile.getEmail());
