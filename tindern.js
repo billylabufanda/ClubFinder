@@ -250,7 +250,7 @@ function goGoGoogle() {
     profileButtonHTML.addEventListener("click", renderProfile);
     function renderProfile(){
         if(profile != null){
-            console.log("hi")
+            console.log("testingrenderprofile")
         }
     }
 })();
