@@ -56,6 +56,26 @@
 #InternshipCardandFilters {
     display: flex;
 }
+#profilePage{
+     border-radius: 10px 10px 10px 10px;
+    -moz-border-radius: 10px 10px 10px 10px;
+    -webkit-border-radius: 10px 10px 10px 10px;
+    padding: 1.5vh 1vw 1.5vh 1vw;
+    /*background-color:#80c1ff;*/
+    background-color: #dddfd4;
+    line-height: 10vh;
+    font-size: 3.5vh;
+    font-family:Impact, Charcoal, sans-serif;
+    height: 100%;
+    float:left;
+    position:relative;
+    text-align: left;
+    border-style:hidden;
+    border-width: 100px;
+    height: 65vh;
+    margin-left: 2vw;
+    visibility: hidden;
+}
 #InternshipCard {
     border-radius: 10px 10px 10px 10px;
     -moz-border-radius: 10px 10px 10px 10px;
