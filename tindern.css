@@ -31,6 +31,28 @@
 #header {
     color:black
 }
+#profileViewingButton{
+    -webkit-border-radius: 28;
+    -moz-border-radius: 28;
+    border-radius: 28px;
+    font-family: Arial;
+    color: black;
+    font-size: 20px;
+    background: #dddfd4;
+    text-decoration: none;
+    padding: 10px 20px 10px 20px;
+    text-decoration: none;
+    text-align: center;
+    margin-top:5vh;
+    float:left;
+    border-style:hidden;
+    border-width: 100px;
+    margin-left: 2vw;
+}
+#profileViewingButton:hover {
+    background: #e8e9e2;
+    text-decoration: none;
+}
 #InternshipCardandFilters {
     display: flex;
 }
