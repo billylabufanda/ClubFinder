@@ -226,6 +226,6 @@ var returnSavedInternshipPageBackToRegularInternshipsBoolean = true
         'theme': 'dark',
         'onsuccess': onSuccess,
         'onfailure': onFailure
-      }
-      console.log('did it go?')
+      });
+      console.log('did it go?');
     }
