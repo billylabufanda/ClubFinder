@@ -5,6 +5,7 @@
  * Time: 03:53 PM
  **/
 
+/*
 function Internship(name, size, interest, location) {
     this.name = name;
     this.size = size;
@@ -217,7 +218,7 @@ var returnSavedInternshipPageBackToRegularInternshipsBoolean = true
             }
         }
     }
-    
+    */
 function onSuccess(googleUser) {
   console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
 }
