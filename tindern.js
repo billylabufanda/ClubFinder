@@ -3,10 +3,7 @@
  * User: billylabufanda
  * Date: 2016-05-30
  * Time: 03:53 PM
- * To change this template use Tools | Templates.
  **/
-//Error function cause no inspect element
-//Internship Object Prototype
 
 function Internship(name, size, interest, location) {
     this.name = name;
@@ -219,4 +216,16 @@ var returnSavedInternshipPageBackToRegularInternshipsBoolean = true
                 renderInternship()
             }
         }
+    }
+  function goGoGoogle() {
+      gapi.signin2.render('google-signin-button', {
+                'scope': 'profile email',
+        'width': 240,
+        'height': 50,
+        'longtitle': true,
+        'theme': 'dark',
+        'onsuccess': onSuccess,
+        'onfailure': onFailure
+      }
+      console.log('did it go?')
     }
