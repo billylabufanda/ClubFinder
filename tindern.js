@@ -244,4 +244,11 @@ function goGoGoogle() {
   console.log('did it go?');
 }
 
+(function (){
+    var profileButtonHTML = document.getElementById("profileViewingButton")
+    profileButtonHTML.addEventListener("click", renderProfile);
+    function renderProfile(){
+        console.log("hi")
+    }
+})();
 
