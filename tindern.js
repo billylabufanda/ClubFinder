@@ -245,10 +245,13 @@ function goGoGoogle() {
 }
 
 (function (){
+    var profile = googleUser.getBasicProfile();
     var profileButtonHTML = document.getElementById("profileViewingButton")
     profileButtonHTML.addEventListener("click", renderProfile);
     function renderProfile(){
-        console.log("hi")
+        if(profile != null){
+            console.log("hi")
+        }
     }
 })();
 
