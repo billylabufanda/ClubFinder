@@ -249,8 +249,9 @@ function goGoGoogle() {
     var profileButtonHTML = document.getElementById("profileViewingButton")
     profileButtonHTML.addEventListener("click", renderProfile);
     function renderProfile(){
+        console.log("testingrenderprofile1")
         if(profile != null){
-            console.log("testingrenderprofile")
+            console.log("testingrenderprofile2")
         }
     }
 })();
