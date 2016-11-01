@@ -229,7 +229,6 @@ function onSuccess(googleUser) {
   userData.profileURL = profile.getImageUrl()
   userData.email = profile.getEmail()
   console.log("Name: hi this is a test "+userData.name)
-  document.getElementById("ProfileName").innerHTML = "Name: " + profile.getName();
 }
 function onFailure(error) {
   console.log(error);
@@ -254,7 +253,6 @@ function goGoGoogle() {
         console.log("testingrenderprofile1")
         
     }
-    renderProfile()
 })();
 
 
