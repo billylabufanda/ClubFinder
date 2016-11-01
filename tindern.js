@@ -248,14 +248,11 @@ function goGoGoogle() {
 }
 
 (function (){
-    var profile = googleUser.getBasicProfile();
-    var profileButtonHTML = document.getElementById("profileViewingButton")
+    var profileButtonHTML = document.getElementById("viewSavedInternships")
     profileButtonHTML.addEventListener("click", renderProfile);
     function renderProfile(){
         console.log("testingrenderprofile1")
-        if(profile != null){
-            console.log("testingrenderprofile2")
-        }
+        
     }
     renderProfile()
 })();
