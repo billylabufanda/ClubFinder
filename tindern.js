@@ -212,6 +212,12 @@ var returnSavedInternshipPageBackToRegularInternshipsBoolean = true
             }
         }
     }
+    
+    var profileButtonHTML = document.getElementById("viewSavedInternships")
+    profileButtonHTML.addEventListener("click", renderProfile);
+    function renderProfile(){
+        console.log("testingrenderprofile1");
+    };    
 })();
 
 var userData = {
@@ -245,14 +251,5 @@ function goGoGoogle() {
   });
   console.log('did it go?');
 }
-
-(function (){
-    var profileButtonHTML = document.getElementById("viewSavedInternships")
-    profileButtonHTML.addEventListener("click", renderProfile);
-    function renderProfile(){
-        console.log("testingrenderprofile1")
-        
-    }
-})();
 
 
