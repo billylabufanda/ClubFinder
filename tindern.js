@@ -228,7 +228,7 @@ function onSuccess(googleUser) {
   userData.name = profile.getName()
   userData.profileURL = profile.getImageUrl()
   userData.email = profile.getEmail()
-  console.log("Name: "+userData.name)
+  console.log("Name: hi this is a test "+userData.name)
   document.getElementById("ProfileName").innerHTML = "Name: " + profile.getName();
 }
 function onFailure(error) {
