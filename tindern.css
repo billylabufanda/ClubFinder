@@ -4,7 +4,8 @@
 }
 .mdl-navigation__link:hover {
    background-color:#293ea5;
- transition:.2s;
+   transition:.2s;
+   text-decoration:none;
 }
 #listOfFilters {
     font-size: large;
