@@ -1,9 +1,3 @@
-/**
- * Created with Tindernship.
- * User: billylabufanda
- * Date: 2016-05-30
- * Time: 03:53 PM
- **/
 (function() {
 
 function Internship(name, size, interest, location) {
@@ -160,7 +154,7 @@ var dummyvariable = 0
         }
     }
     //Saved Internships Page
-var placeholderButton = document.getElementById("placeholderButton")
+var placeholderButton = document.getElementById("viewSavedInternships")
 placeholderButton.addEventListener("click", savedInternshipsDisplay)
 var returnSavedInternshipPageBackToRegularInternshipsBoolean = true
 
@@ -220,13 +214,21 @@ var returnSavedInternshipPageBackToRegularInternshipsBoolean = true
     }
 })();
 
-    
+var userData = {
+    name:"beep",
+    profileURL:"beep",
+    email:"boop"
+}   
 function onSuccess(googleUser) {
   console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
   var profile = googleUser.getBasicProfile();
   console.log('Name: ' + profile.getName());
   console.log('Image URL: ' + profile.getImageUrl());
   console.log('Email: ' + profile.getEmail());
+  userData.name = profile.getName()
+  userData.profileURL = profile.getImageUrl()
+  userData.email = profile.getEmail()
+  console.log("Name: "+userData.name)
   document.getElementById("ProfileName").innerHTML = "Name: " + profile.getName();
 }
 function onFailure(error) {
@@ -236,7 +238,7 @@ function goGoGoogle() {
   gapi.signin2.render('google-signin-button', {
     'scope': 'profile email',
     'width': 240,
-    'height': 50,
+    'height': 25,
     'longtitle': true,
     'theme': 'dark',
     'onsuccess': onSuccess,
@@ -255,5 +257,7 @@ function goGoGoogle() {
             console.log("testingrenderprofile2")
         }
     }
+    renderProfile()
 })();
+
 
