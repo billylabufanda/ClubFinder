@@ -1,257 +1,281 @@
 (function() {
-
-function Internship(name, size, interest, location) {
-    this.name = name;
-    this.size = size;
-    this.interest = interest;
-    this.location = location;
-}
-//Creates the spreadsheet link
-var spreadsheetId = "1mbhOYeSMbUxoYYej2ypa9EBqALvran9G_9ZKU80Hki4",
-    databaseUrl = "https://spreadsheets.google.com/feeds/list/" + spreadsheetId + "/od6/public/basic?alt=json";
-//Some Variables
-var internshipObjects = [];
-var hiddenInternshipObjects = [];
-var jsonString;
-//Calls JSON and then slices and dices it
-$.getJSON(databaseUrl, function(json) {
-    //     console.log(json.feed.entry.title.toString());
-    jsonString = JSON.stringify(json);
-    jsonString = jsonString.slice(jsonString.indexOf("title") + 5, jsonString.length);
-    jsonString = jsonString.slice(jsonString.indexOf("title") + 5, jsonString.length);
-    jsonString = jsonString.slice(jsonString.indexOf("title") + 5, jsonString.length);
-    //     $("#footer").append(jsonString);
-    while(jsonString.indexOf("title") >= 0) {
-        var name = jsonString.slice(jsonString.indexOf("$t") + 5, jsonString.indexOf("},") - 1);
-        var description = jsonString.slice(jsonString.indexOf("cokwr") + 7, jsonString.indexOf(", _"));
-        var location = jsonString.slice(jsonString.indexOf("_cpzh4") + 7, jsonString.indexOf("link") - 4);
+    function Internship(name, size, interest, location) {
+        this.name = name;
+        this.size = size;
+        this.interest = interest;
+        this.location = location;
+    }
+    //Creates the spreadsheet link
+    var spreadsheetId = "1mbhOYeSMbUxoYYej2ypa9EBqALvran9G_9ZKU80Hki4",
+        databaseUrl = "https://spreadsheets.google.com/feeds/list/" + spreadsheetId + "/od6/public/basic?alt=json";
+    //Some Variables
+    var internshipObjects = [];
+    var hiddenInternshipObjects = [];
+    var jsonString;
+    //Calls JSON and then slices and dices it
+    $.getJSON(databaseUrl, function(json) {
+        //     console.log(json.feed.entry.title.toString());
+        jsonString = JSON.stringify(json);
         jsonString = jsonString.slice(jsonString.indexOf("title") + 5, jsonString.length);
-        var internship = new Internship(name, 0, description, location)
-        internshipObjects.push(internship);
-        //         $("#footer").append(name+" ");
-        //         $("#footer").append(internship.toString());
-    }
-    nextInternship = internshipObjects[0];
-    InternshipName.innerHTML = "Name: " + nextInternship.name
-    InternshipInterest.innerHTML = "Interest: " + nextInternship.interest
-    InternshipSize.innerHTML = "Size: " + nextInternship.size
-    InternshipLocation.innerHTML = "Location: " + nextInternship.location
-    renderInternship()
-});
-//This is the object that is displayed, it is based on currentInternship, a value in the array of internshipObjects
-var nextInternship;
-var currentInternship = 0;
-var nextInternshipButton = document.getElementById("nextInternshipButton");
-var InternshipName = document.getElementById("InternshipName");
-var InternshipInterest = document.getElementById("InternshipInterest");
-var InternshipSize = document.getElementById("InternshipSize");
-var InternshipLocation = document.getElementById("InternshipLocation");
-//Render Things
-
-function renderInternship() {
-    nextInternship = internshipObjects[currentInternship]
-    InternshipName.innerHTML = "Name: " + nextInternship.name
-    InternshipInterest.innerHTML = "Interest: " + nextInternship.interest
-    InternshipSize.innerHTML = "Size: " + nextInternship.size
-    InternshipLocation.innerHTML = "Location: " + nextInternship.location
-}
-//When the Button is Clicked
-nextInternshipButton.addEventListener("click", buttonclick);
-
-function buttonclick() {
-    currentInternship++
-    //Loops though database
-    if(currentInternship >= internshipObjects.length) {
-        currentInternship = 0;
-    }
-    renderInternship()
-    //document.getElementsByClassName("starHTML")[0].className = "glyphicon glyphicon-star-empty starHTML"
-};
-filterWords();
-//Filter Based on Key Words
-
-function filterWords() {
-    var checkmarkHTML = document.getElementsByClassName("checkmarkVisual");
-    console.log(checkmarkHTML.length);
-    for(var i = 0; i < checkmarkHTML.length; i++) {
-        addEventListener(checkmarkHTML[i], i);
-    }
-};
-
-function addEventListener(element, index) {
-    console.log("addEventListenerfunctiontest")
-    element.addEventListener("click", function() {
-        clickCheck(index)
-    }, false);
-}
-
-function clickCheck(index) {
-    console.log(index);
-    if(document.getElementsByClassName("checkmarkVisual")[index].className == "glyphicon glyphicon-remove checkmarkVisual") {
-        console.log("xmarkcheck")
-        document.getElementsByClassName("checkmarkVisual")[index].className = "glyphicon glyphicon-ok checkmarkVisual";
-        for(var v = 0; v < hiddenInternshipObjects.length; v++) {
-            if(hiddenInternshipObjects[v].interest.includes(document.getElementsByClassName("checkmarkVisual")[index].textContent.toLowerCase())) {
-                internshipObjects.push(hiddenInternshipObjects[v])
-                hiddenInternshipObjects.splice(v, 1);
-                v--;
-            }
+        jsonString = jsonString.slice(jsonString.indexOf("title") + 5, jsonString.length);
+        jsonString = jsonString.slice(jsonString.indexOf("title") + 5, jsonString.length);
+        //     $("#footer").append(jsonString);
+        while(jsonString.indexOf("title") >= 0) {
+            var name = jsonString.slice(jsonString.indexOf("$t") + 5, jsonString.indexOf("},") - 1);
+            var description = jsonString.slice(jsonString.indexOf("cokwr") + 7, jsonString.indexOf(", _"));
+            var location = jsonString.slice(jsonString.indexOf("_cpzh4") + 7, jsonString.indexOf("link") - 4);
+            jsonString = jsonString.slice(jsonString.indexOf("title") + 5, jsonString.length);
+            var internship = new Internship(name, 0, description, location)
+            internshipObjects.push(internship);
+            //         $("#footer").append(name+" ");
+            //         $("#footer").append(internship.toString());
         }
-    } else {
-        console.log("checkmarkcheck");
-        document.getElementsByClassName("checkmarkVisual")[index].className = "glyphicon glyphicon-remove checkmarkVisual";
-        //         alert(document.getElementsByClassName("checkmarkVisual")[index].className);
-        //alert(nextInternship.interest);
-        for(var v = 0; v < internshipObjects.length; v++) {
-            if(internshipObjects[v].interest.includes(document.getElementsByClassName("checkmarkVisual")[index].textContent.toLowerCase())) {
-                hiddenInternshipObjects.push(internshipObjects[v])
-                internshipObjects.splice(v, 1);
-                v--;
-                if(v <= currentInternship) {
-                    currentInternship--;
-                }
-            }
-        }
-        if(currentInternship < 0) {
+        nextInternship = internshipObjects[0];
+        InternshipName.innerHTML = "Name: " + nextInternship.name
+        InternshipInterest.innerHTML = "Interest: " + nextInternship.interest
+        InternshipSize.innerHTML = "Size: " + nextInternship.size
+        InternshipLocation.innerHTML = "Location: " + nextInternship.location
+        renderInternship()
+    });
+    //This is the object that is displayed, it is based on currentInternship, a value in the array of internshipObjects
+    var nextInternship;
+    var currentInternship = 0;
+    var nextInternshipButton = document.getElementById("nextInternshipButton");
+    var InternshipName = document.getElementById("InternshipName");
+    var InternshipInterest = document.getElementById("InternshipInterest");
+    var InternshipSize = document.getElementById("InternshipSize");
+    var InternshipLocation = document.getElementById("InternshipLocation");
+    //Render Things
+
+    function renderInternship() {
+        nextInternship = internshipObjects[currentInternship]
+        InternshipName.innerHTML = "Name: " + nextInternship.name
+        InternshipInterest.innerHTML = "Interest: " + nextInternship.interest
+        InternshipSize.innerHTML = "Size: " + nextInternship.size
+        InternshipLocation.innerHTML = "Location: " + nextInternship.location
+    }
+    //When the Button is Clicked
+    nextInternshipButton.addEventListener("click", buttonclick);
+
+    function buttonclick() {
+        currentInternship++
+        //Loops though database
+        if(currentInternship >= internshipObjects.length) {
             currentInternship = 0;
         }
-        nextInternship = internshipObjects[currentInternship]
         renderInternship()
-    }
-}
-//Prefered Internships
-// var emptyStarHTML = document.getElementsByClassName("starHTML");
-// document.getElementsByClassName("starHTML")[0].addEventListener("click", starFunction1);
-//     function starFunction1() {
-//         if(document.getElementsByClassName("starHTML")[0].className == "glyphicon glyphicon-star-empty starHTML") {
-//             document.getElementsByClassName("starHTML")[0].className = "glyphicon glyphicon-star starHTML"
-//             starredInternshipsArray.push(internshipObjects[currentInternship])
-//             $("#footer").append(starredInternshipsArray[0].interest)
-//         } else {
-//             document.getElementsByClassName("starHTML")[0].className = "glyphicon glyphicon-star-empty starHTML"
-//             starredInternshipsArray.splice(internshipObjects[currentInternship], 1);
-//             console.log("starFunctiontest")
-//         }
-//     }
-var starredInternshipsArray = []
-var starButtonHTML = document.getElementById("saveInternshipButton")
-starButtonHTML.addEventListener("click", starFunction2)
-var dummyvariable = 0
+        //document.getElementsByClassName("starHTML")[0].className = "glyphicon glyphicon-star-empty starHTML"
+    };
+    filterWords();
+    //Filter Based on Key Words
 
-    function starFunction2() {
-        //         console.log("starFunction2 works")
-        if(document.getElementById("InternshipCardHeader").innerHTML == "Saved Internship:") {
-            return("lol")
+    function filterWords() {
+        var checkmarkHTML = document.getElementsByClassName("checkmarkVisual");
+        console.log(checkmarkHTML.length);
+        for(var i = 0; i < checkmarkHTML.length; i++) {
+            addEventListener(checkmarkHTML[i], i);
+        }
+    };
+
+    function addEventListener(element, index) {
+        console.log("addEventListenerfunctiontest")
+        element.addEventListener("click", function() {
+            clickCheck(index)
+        }, false);
+    }
+
+    function clickCheck(index) {
+        console.log(index);
+        if(document.getElementsByClassName("checkmarkVisual")[index].className == "glyphicon glyphicon-remove checkmarkVisual") {
+            console.log("xmarkcheck")
+            document.getElementsByClassName("checkmarkVisual")[index].className = "glyphicon glyphicon-ok checkmarkVisual";
+            for(var v = 0; v < hiddenInternshipObjects.length; v++) {
+                if(hiddenInternshipObjects[v].interest.includes(document.getElementsByClassName("checkmarkVisual")[index].textContent.toLowerCase())) {
+                    internshipObjects.push(hiddenInternshipObjects[v])
+                    hiddenInternshipObjects.splice(v, 1);
+                    v--;
+                }
+            }
         } else {
-            starredInternshipsArray.push(internshipObjects[currentInternship])
-            console.log(internshipObjects[currentInternship].name)
-            //         console.log(starredInternshipsArray[currentInternship].name)
-            console.log(starredInternshipsArray[dummyvariable].interest);
-            dummyvariable++;
-            console.log("dummyvariable = " + dummyvariable)
-            //         $("#footer").append(starredInternshipsArray[currentInternship].interest)  
-            buttonclick()
+            console.log("checkmarkcheck");
+            document.getElementsByClassName("checkmarkVisual")[index].className = "glyphicon glyphicon-remove checkmarkVisual";
+            //         alert(document.getElementsByClassName("checkmarkVisual")[index].className);
+            //alert(nextInternship.interest);
+            for(var v = 0; v < internshipObjects.length; v++) {
+                if(internshipObjects[v].interest.includes(document.getElementsByClassName("checkmarkVisual")[index].textContent.toLowerCase())) {
+                    hiddenInternshipObjects.push(internshipObjects[v])
+                    internshipObjects.splice(v, 1);
+                    v--;
+                    if(v <= currentInternship) {
+                        currentInternship--;
+                    }
+                }
+            }
+            if(currentInternship < 0) {
+                currentInternship = 0;
+            }
+            nextInternship = internshipObjects[currentInternship]
+            renderInternship()
         }
     }
-    //Saved Internships Page
-var placeholderButton = document.getElementById("viewSavedInternships")
-placeholderButton.addEventListener("click", savedInternshipsDisplay)
-var returnSavedInternshipPageBackToRegularInternshipsBoolean = true
+    //Prefered Internships
+    // var emptyStarHTML = document.getElementsByClassName("starHTML");
+    // document.getElementsByClassName("starHTML")[0].addEventListener("click", starFunction1);
+    //     function starFunction1() {
+    //         if(document.getElementsByClassName("starHTML")[0].className == "glyphicon glyphicon-star-empty starHTML") {
+    //             document.getElementsByClassName("starHTML")[0].className = "glyphicon glyphicon-star starHTML"
+    //             starredInternshipsArray.push(internshipObjects[currentInternship])
+    //             $("#footer").append(starredInternshipsArray[0].interest)
+    //         } else {
+    //             document.getElementsByClassName("starHTML")[0].className = "glyphicon glyphicon-star-empty starHTML"
+    //             starredInternshipsArray.splice(internshipObjects[currentInternship], 1);
+    //             console.log("starFunctiontest")
+    //         }
+    //     }
+    var starredInternshipsArray = []
+    var starButtonHTML = document.getElementById("saveInternshipButton")
+    starButtonHTML.addEventListener("click", starFunction2)
+    var dummyvariable = 0
 
-    function savedInternshipsDisplay() {
-        if(returnSavedInternshipPageBackToRegularInternshipsBoolean && starredInternshipsArray.length > 0) {
-            console.log("testinglog")
-            var x = 0
-            document.getElementById("InternshipCardHeader").innerHTML = "Saved Internship:"
-            InternshipName.innerHTML = "Name: " + starredInternshipsArray[x].name
-            InternshipInterest.innerHTML = "Interest: " + starredInternshipsArray[x].interest
-            InternshipSize.innerHTML = "Size: " + starredInternshipsArray[x].size
-            InternshipLocation.innerHTML = "Location: " + starredInternshipsArray[x].location
-            placeholderButton.innerHTML = "Return to Internships"
-            console.log(starredInternshipsArray[x].name)
-            returnSavedInternshipPageBackToRegularInternshipsBoolean = false
-            console.log(returnSavedInternshipPageBackToRegularInternshipsBoolean)
-            nextInternshipButton.addEventListener("click", savedInternshipsButtonClick);
-            console.log("1x is equal to " + x)
+        function starFunction2() {
+            //         console.log("starFunction2 works")
+            if(document.getElementById("InternshipCardHeader").innerHTML == "Saved Internship:") {
+                return("lol")
+            } else {
+                starredInternshipsArray.push(internshipObjects[currentInternship])
+                console.log(internshipObjects[currentInternship].name)
+                //         console.log(starredInternshipsArray[currentInternship].name)
+                console.log(starredInternshipsArray[dummyvariable].interest);
+                dummyvariable++;
+                console.log("dummyvariable = " + dummyvariable)
+                //         $("#footer").append(starredInternshipsArray[currentInternship].interest)  
+                buttonclick()
+            }
+        }
+        //Saved Internships Page
+    var placeholderButton = document.getElementById("viewSavedInternships")
+    placeholderButton.addEventListener("click", savedInternshipsDisplay)
+    var returnSavedInternshipPageBackToRegularInternshipsBoolean = true
 
-            function savedInternshipsButtonClick() {
-                if(x >= starredInternshipsArray.length - 1) {
-                    console.log("switching x back to 0")
-                    x = 0
-                } else {
-                    x++
-                }
-                console.log("2x is equal to " + x)
+        function savedInternshipsDisplay() {
+            if(returnSavedInternshipPageBackToRegularInternshipsBoolean && starredInternshipsArray.length > 0) {
+                console.log("testinglog")
+                var x = 0
+                document.getElementById("InternshipCardHeader").innerHTML = "Saved Internship:"
                 InternshipName.innerHTML = "Name: " + starredInternshipsArray[x].name
                 InternshipInterest.innerHTML = "Interest: " + starredInternshipsArray[x].interest
                 InternshipSize.innerHTML = "Size: " + starredInternshipsArray[x].size
                 InternshipLocation.innerHTML = "Location: " + starredInternshipsArray[x].location
-            }
-            returnSavedInternshipPageBackToRegularInternshipsBoolean = false
-        } else {
-            console.log(internshipObjects[currentInternship].name)
-            console.log(returnSavedInternshipPageBackToRegularInternshipsBoolean)
-            console.log("elsefunctionisworking")
-            console.log(internshipObjects[currentInternship].name)
-            document.getElementById("InternshipCardHeader").innerHTML = "Internship:"
-            InternshipName.innerHTML = "Name: " + nextInternship.name
-            InternshipInterest.innerHTML = "Interest: " + nextInternship.interest
-            InternshipSize.innerHTML = "Size: " + nextInternship.size
-            InternshipLocation.innerHTML = "Location: " + nextInternship.location
-            placeholderButton.innerHTML = "Click for saved internships"
-            returnSavedInternshipPageBackToRegularInternshipsBoolean = true;
-            nextInternshipButton.addEventListener("click", buttonclick2)
+                placeholderButton.innerHTML = "Return to Internships"
+                console.log(starredInternshipsArray[x].name)
+                returnSavedInternshipPageBackToRegularInternshipsBoolean = false
+                console.log(returnSavedInternshipPageBackToRegularInternshipsBoolean)
+                nextInternshipButton.addEventListener("click", savedInternshipsButtonClick);
+                console.log("1x is equal to " + x)
 
-            function buttonclick2() {
-                currentInternship++
-                //Loops though database
-                if(currentInternship >= internshipObjects.length) {
-                    currentInternship = 0;
+                function savedInternshipsButtonClick() {
+                    if(x >= starredInternshipsArray.length - 1) {
+                        console.log("switching x back to 0")
+                        x = 0
+                    } else {
+                        x++
+                    }
+                    console.log("2x is equal to " + x)
+                    InternshipName.innerHTML = "Name: " + starredInternshipsArray[x].name
+                    InternshipInterest.innerHTML = "Interest: " + starredInternshipsArray[x].interest
+                    InternshipSize.innerHTML = "Size: " + starredInternshipsArray[x].size
+                    InternshipLocation.innerHTML = "Location: " + starredInternshipsArray[x].location
                 }
-                renderInternship()
+                returnSavedInternshipPageBackToRegularInternshipsBoolean = false
+            } else {
+                console.log(internshipObjects[currentInternship].name)
+                console.log(returnSavedInternshipPageBackToRegularInternshipsBoolean)
+                console.log("elsefunctionisworking")
+                console.log(internshipObjects[currentInternship].name)
+                document.getElementById("InternshipCardHeader").innerHTML = "Internship:"
+                InternshipName.innerHTML = "Name: " + nextInternship.name
+                InternshipInterest.innerHTML = "Interest: " + nextInternship.interest
+                InternshipSize.innerHTML = "Size: " + nextInternship.size
+                InternshipLocation.innerHTML = "Location: " + nextInternship.location
+                placeholderButton.innerHTML = "Click for saved internships"
+                returnSavedInternshipPageBackToRegularInternshipsBoolean = true;
+                nextInternshipButton.addEventListener("click", buttonclick2)
+
+                function buttonclick2() {
+                    currentInternship++
+                    //Loops though database
+                    if(currentInternship >= internshipObjects.length) {
+                        currentInternship = 0;
+                    }
+                    renderInternship()
+                }
             }
         }
-    }
-    
+        //Showing the Google Profile
     var profileButtonHTML = document.getElementById("viewProfilePage")
     profileButtonHTML.addEventListener("click", renderProfile);
-    function renderProfile(){
-        console.log("testingrenderprofile1");
-        var InternshipCardandFiltersHTML = document.getElementById("InternshipCardandFilters");
-        InternshipCardandFiltersHTML.innerHTML = "hi"
-    };    
+    var buttonClickBoolean = true
+
+        function renderProfile() {
+            var InternshipCardHTML = document.getElementById("InternshipCard");
+            var FilterCardHTML = document.getElementById("FilterCard");
+            var ProfileCardHTML = document.getElementById("ProfileCard");
+            var ProfileCardButton = document.getElementById("viewProfilePage");
+            if(buttonClickBoolean) {
+                InternshipCardHTML.style.zIndex = "-1";
+                FilterCardHTML.style.zIndex = "-1";
+                ProfileCardHTML.style.zIndex = "1";
+                ProfileCardHTML.style.visibility = "visible";
+                InternshipCardHTML.style.visibility = "hidden";
+                FilterCardHTML.style.visibility = "hidden";
+                buttonClickBoolean = false
+                ProfileCardButton.innerHTML = "Return to Internships"
+                console.log("testingrenderprofile2");
+            } else {
+                InternshipCardHTML.style.zIndex = "1";
+                FilterCardHTML.style.zIndex = "1";
+                ProfileCardHTML.style.zIndex = "-1";
+                ProfileCardHTML.style.visibility = "hidden";
+                InternshipCardHTML.style.visibility = "visible";
+                FilterCardHTML.style.visibility = "visible";
+                ProfileCardButton.innerHTML = "Profile Page"
+                buttonClickBoolean = true
+                console.log("testingrenderprofile3")
+            }
+            console.log("testingrenderprofile1");
+        };
 })();
-
 var userData = {
-    name:"beep",
-    profileURL:"beep",
-    email:"boop"
-}   
-function onSuccess(googleUser) {
-  console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
-  var profile = googleUser.getBasicProfile();
-  console.log('Name: ' + profile.getName());
-  console.log('Image URL: ' + profile.getImageUrl());
-  console.log('Email: ' + profile.getEmail());
-  userData.name = profile.getName()
-  userData.profileURL = profile.getImageUrl()
-  userData.email = profile.getEmail()
-  console.log("Name: hi this is a test "+userData.name)
-}
-function onFailure(error) {
-  console.log(error);
-}
-function goGoGoogle() {
-  gapi.signin2.render('google-signin-button', {
-    'scope': 'profile email',
-    'width': 240,
-    'height': 25,
-    'longtitle': true,
-    'theme': 'dark',
-    'onsuccess': onSuccess,
-    'onfailure': onFailure
-  });
-  console.log('did it go?');
+    name: "Chuck Norris",
+    profileURL: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/M101_hires_STScI-PRC2006-10a.jpg/1280px-M101_hires_STScI-PRC2006-10a.jpg",
+    email: "chucknorris@hotmail.com"
 }
 
+    function onSuccess(googleUser) {
+        console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
+        var profile = googleUser.getBasicProfile();
+        console.log('Name: ' + profile.getName());
+        console.log('Image URL: ' + profile.getImageUrl());
+        console.log('Email: ' + profile.getEmail());
+        userData.name = profile.getName()
+        userData.profileURL = profile.getImageUrl()
+        userData.email = profile.getEmail()
+        console.log("Name: hi this is a test " + userData.name)
+    }
 
+    function onFailure(error) {
+        console.log(error);
+    }
+
+    function goGoGoogle() {
+        gapi.signin2.render('google-signin-button', {
+            'scope': 'profile email',
+            'width': 240,
+            'height': 25,
+            'longtitle': true,
+            'theme': 'dark',
+            'onsuccess': onSuccess,
+            'onfailure': onFailure
+        });
+        console.log('did it go?');
+    }
