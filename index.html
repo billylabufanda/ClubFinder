@@ -20,7 +20,7 @@
                     <div class="mdl-layout-spacer"></div>
                     <nav class="mdl-navigation">
                         <a id="viewSavedInternships" class="mdl-navigation__link"> Saved Internships</a>
-                        <a id = "viewProfilePage" class="mdl-navigation__link">Profile Page</a>
+                        <a id="viewProfilePage" class="mdl-navigation__link">Profile Page</a>
                         <a class="mdl-navigation__link" id="google-signin-button"></a>
                     </nav>
                 </div>
@@ -29,65 +29,76 @@
         <main class="mdl-layout__content">
             <div class="page-content">
                 <div id="InternshipCardandFilters" class="mdl-grid">
-                <!--Internship Filter -->
-                <div class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--6-col">
-                    <div class="mdl-card__title mdl-card--border">
-                        <h1 class="mdl-card__title-text">Filter Fields:</h1>
+                    <!--Internship Filter -->
+                    <div id = "FilterCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--6-col">
+                        <div class="mdl-card__title mdl-card--border">
+                            <h1 class="mdl-card__title-text">Filter Fields:</h1>
+                        </div>
+                        <div class="mdl-card__supporting-text">
+                            <ul id="listOfFilters">
+                                <span class="glyphicon glyphicon-ok checkmarkVisual">Animal</span> 
+                                <br>
+                                <span class="glyphicon glyphicon-ok checkmarkVisual">Architecture</span> 
+                                <br>
+                                <span class="glyphicon glyphicon-ok checkmarkVisual">Art</span> 
+                                <br>
+                                <span class="glyphicon glyphicon-ok checkmarkVisual">Education</span> 
+                                <br>
+                                <span class="glyphicon glyphicon-ok checkmarkVisual">Engineering</span> 
+                                <br>
+                                <span class="glyphicon glyphicon-ok checkmarkVisual">Healthcare</span> 
+                                <br>
+                                <span class="glyphicon glyphicon-ok checkmarkVisual">Law</span> 
+                                <br>
+                                <span class="glyphicon glyphicon-ok checkmarkVisual">Science</span> 
+                                <br>
+                                <span class="glyphicon glyphicon-ok checkmarkVisual">Social Services</span> 
+                                <br>
+                                <span class="glyphicon glyphicon-ok checkmarkVisual">Technology</span> 
+                                <br>
+                                <span class="glyphicon glyphicon-ok checkmarkVisual">Youth Development</span> 
+                                <br>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="mdl-card__supporting-text">
-                        <ul id="listOfFilters">
-                            <span class="glyphicon glyphicon-ok checkmarkVisual">Animal</span> 
-                            <br>
-                            <span class="glyphicon glyphicon-ok checkmarkVisual">Architecture</span> 
-                            <br>
-                            <span class="glyphicon glyphicon-ok checkmarkVisual">Art</span> 
-                            <br>
-                            <span class="glyphicon glyphicon-ok checkmarkVisual">Education</span> 
-                            <br>
-                            <span class="glyphicon glyphicon-ok checkmarkVisual">Engineering</span> 
-                            <br>
-                            <span class="glyphicon glyphicon-ok checkmarkVisual">Healthcare</span> 
-                            <br>
-                            <span class="glyphicon glyphicon-ok checkmarkVisual">Law</span> 
-                            <br>
-                            <span class="glyphicon glyphicon-ok checkmarkVisual">Science</span> 
-                            <br>
-                            <span class="glyphicon glyphicon-ok checkmarkVisual">Social Services</span> 
-                            <br>
-                            <span class="glyphicon glyphicon-ok checkmarkVisual">Technology</span> 
-                            <br>
-                            <span class="glyphicon glyphicon-ok checkmarkVisual">Youth Development</span> 
-                            <br>
-                        </ul>
+                    <!--Internship Card -->
+                    <div id = "InternshipCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--6-col">
+                        <div class="mdl-card__title mdl-card--border">
+                            <h1 id="InternshipCardHeader" class="mdl-card__title-text">Internship:</h1>
+                        </div>
+                        <div id="internshipCardAttributesList" class="mdl-card__supporting-text">
+                            <p id="InternshipName"></p>
+                            <p id="InternshipInterest"></p>
+                            <p id="InternshipSize"></p>
+                            <p id="InternshipLocation"></p>
+                        </div>
+                    </div>
+                    <!-- Profile Page -->
+                    <div id = "ProfileCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--12-col">
+                        <div class="mdl-card__title mdl-card--border">
+                            <h1 id="ProfileCardHeader" class="mdl-card__title-text">Profile:</h1>
+                        </div>
+                        <div id="ProfileCardAttributesList" class="mdl-card__supporting-text">
+                            <p id="ProfileName">Chuck Norris</p>
+                            <p id="ProfileEmail">chucknorris@hotmail.com</p>
+                            <p id="ProfileImage">chucknorris.jpeg</p>
+                        </div>
                     </div>
                 </div>
-                <!--Internship Card -->
-                <div class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--6-col">
-                    <div class="mdl-card__title mdl-card--border">
-                        <h1 id="InternshipCardHeader" class="mdl-card__title-text">Internship:</h1>
-                    </div>
-                    <div id="internshipCardAttributesList" class="mdl-card__supporting-text">
-                        <p id="InternshipName"></p>
-                        <p id="InternshipInterest"></p>
-                        <p id="InternshipSize"></p>
-                        <p id="InternshipLocation"></p>
-                    </div>
-                </div>
-            </div>
                 <div id="buttons" class="mdl-grid">
-                <button id="nextInternshipButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised mdl-cell mdl-cell--6-col">
-                    Next Internship
-                </button>
-                <button id="saveInternshipButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised mdl-cell mdl-cell--6-col">
-                    Save Internship for Later Viewing
-                </button>
-                <!--                 <button id="placeholderButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised">
+                    <button id="nextInternshipButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised mdl-cell mdl-cell--6-col">
+                        Next Internship
+                    </button>
+                    <button id="saveInternshipButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised mdl-cell mdl-cell--6-col">
+                        Save Internship for Later Viewing
+                    </button>
+                    <!--                 <button id="placeholderButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised">
                     Click for saved internships
                 </button> -->
-            </div>
-            <div id="footer">
-                Made By William McEachen
-            </div>
+                </div>
+                <div id="footer">
+                    Made By William McEachen
+                </div>
 
             </div>
         </main>
