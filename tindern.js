@@ -213,7 +213,7 @@ var returnSavedInternshipPageBackToRegularInternshipsBoolean = true
         }
     }
     
-    var profileButtonHTML = document.getElementById("viewSavedInternships")
+    var profileButtonHTML = document.getElementById("viewProfilePage")
     profileButtonHTML.addEventListener("click", renderProfile);
     function renderProfile(){
         console.log("testingrenderprofile1");
