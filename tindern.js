@@ -220,6 +220,9 @@
             var InternshipCardHTML = document.getElementById("InternshipCard");
             var FilterCardHTML = document.getElementById("FilterCard");
             var ProfileCardHTML = document.getElementById("ProfileCard");
+            var ProfileCardNameHTML = document.getElementById("ProfileName");
+            var ProfileCardEmailHTML = document.getElementById("ProfileEmail");
+            var ProfileCardIMGHTML = document.getElementById("ProfileImage");
             var ProfileCardButton = document.getElementById("viewProfilePage");
             if(buttonClickBoolean) {
                 InternshipCardHTML.style.zIndex = "-1";
@@ -230,6 +233,9 @@
                 FilterCardHTML.style.visibility = "hidden";
                 buttonClickBoolean = false
                 ProfileCardButton.innerHTML = "Return to Internships"
+                ProfileCardNameHTML.innerHTML = "Name: " + userData.name
+                ProfileCardEmailHTML.innerHTML = "Email Address: " + userData.email
+                ProfileCardIMGHTML.innerHTML = "User Image: " + userData.profileURL
                 console.log("testingrenderprofile2");
             } else {
                 InternshipCardHTML.style.zIndex = "1";
