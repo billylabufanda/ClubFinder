@@ -231,11 +231,11 @@
                 ProfileCardHTML.style.visibility = "visible";
                 InternshipCardHTML.style.visibility = "hidden";
                 FilterCardHTML.style.visibility = "hidden";
-                buttonClickBoolean = false
-                ProfileCardButton.innerHTML = "Return to Internships"
-                ProfileCardNameHTML.innerHTML = "Name: " + userData.name
-                ProfileCardEmailHTML.innerHTML = "Email Address: " + userData.email
-                ProfileCardIMGHTML.innerHTML = "User Image: " + userData.profileURL
+                ProfileCardButton.innerHTML = "Return to Internships";
+                ProfileCardNameHTML.innerHTML = "Name: " + userData.name;
+                ProfileCardEmailHTML.innerHTML = "Email Address: " + userData.email;
+                ProfileCardIMGHTML.src = userData.profileURL;
+                buttonClickBoolean = false;
                 console.log("testingrenderprofile2");
             } else {
                 InternshipCardHTML.style.zIndex = "1";
