@@ -3,16 +3,33 @@
     visibility: hidden;
 }
 .mdl-navigation__link:hover {
-   background-color:#293ea5;
-   transition:.2s;
-   text-decoration:none;
+    background-color:#293ea5;
+    transition:.2s;
+    text-decoration:none;
 }
 #listOfFilters {
     font-size: large;
 }
-
 #internshipCardAttributesList {
     font-size: large;
+}
+#ProfileCard {
+    position:relative;
+    top: -50vh;
+    visibility:hidden;
+    z-index: -1;
+}
+#InternshipCard {
+    position:relative;
+    z-index: 1;
+}
+#FilterCard {
+    position:relative;
+    z-index:1;
+}
+#buttons {
+    position:relative;
+    top: -30vh;
 }
 #footer {
     text-align:center;
