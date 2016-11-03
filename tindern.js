@@ -186,6 +186,31 @@
                     InternshipSize.innerHTML = "Size: " + starredInternshipsArray[x].size
                     InternshipLocation.innerHTML = "Location: " + starredInternshipsArray[x].location
                 }
+                starButtonHTML.innerHTML = "Delete Internship"
+                starButtonHTML.addEventListener("click", deleteSavedInternship)
+
+                function deleteSavedInternship() {
+                    console.log("deleteSavedInternship1")
+                    starredInternshipsArray.splice(x, 1)
+                    x++
+                    if(starredInternshipsArray.length > 0 && x >= starredInternshipsArray.length - 1) {
+                        x = 0
+                        InternshipName.innerHTML = "Name: " + starredInternshipsArray[x].name
+                        InternshipInterest.innerHTML = "Interest: " + starredInternshipsArray[x].interest
+                        InternshipSize.innerHTML = "Size: " + starredInternshipsArray[x].size
+                        InternshipLocation.innerHTML = "Location: " + starredInternshipsArray[x].location
+                    } else if(starredInternshipsArray.length > 0) {
+                        InternshipName.innerHTML = "Name: " + starredInternshipsArray[x].name
+                        InternshipInterest.innerHTML = "Interest: " + starredInternshipsArray[x].interest
+                        InternshipSize.innerHTML = "Size: " + starredInternshipsArray[x].size
+                        InternshipLocation.innerHTML = "Location: " + starredInternshipsArray[x].location
+                    } else {
+                        InternshipName.innerHTML = "Name: "
+                        InternshipInterest.innerHTML = "Interest: "
+                        InternshipSize.innerHTML = "Size: "
+                        InternshipLocation.innerHTML = "Location: "
+                    }
+                }
                 returnSavedInternshipPageBackToRegularInternshipsBoolean = false
             } else {
                 console.log(internshipObjects[currentInternship].name)
@@ -197,9 +222,22 @@
                 InternshipInterest.innerHTML = "Interest: " + nextInternship.interest
                 InternshipSize.innerHTML = "Size: " + nextInternship.size
                 InternshipLocation.innerHTML = "Location: " + nextInternship.location
-                placeholderButton.innerHTML = "Click for saved internships"
+                placeholderButton.innerHTML = "Saved Internships"
+                starButtonHTML.innerHTML = "Save Internship for Later Viewing"
                 returnSavedInternshipPageBackToRegularInternshipsBoolean = true;
                 nextInternshipButton.addEventListener("click", buttonclick2)
+                if(document.getElementById("InternshipCardHeader").innerHTML == "Saved Internship:") {
+                    return("lol")
+                } else {
+                    starredInternshipsArray.push(internshipObjects[currentInternship])
+                    console.log(internshipObjects[currentInternship].name)
+                    //         console.log(starredInternshipsArray[currentInternship].name)
+                    console.log(starredInternshipsArray[dummyvariable].interest);
+                    dummyvariable++;
+                    console.log("dummyvariable = " + dummyvariable)
+                    //         $("#footer").append(starredInternshipsArray[currentInternship].interest)  
+                    buttonclick()
+                }
 
                 function buttonclick2() {
                     currentInternship++
@@ -255,6 +293,7 @@ var userData = {
     name: "Chuck Norris",
     profileURL: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/M101_hires_STScI-PRC2006-10a.jpg/1280px-M101_hires_STScI-PRC2006-10a.jpg",
     email: "chucknorris@hotmail.com"
+    //     savedInternships:
 }
 
     function onSuccess(googleUser) {
