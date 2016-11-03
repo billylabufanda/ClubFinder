@@ -19,6 +19,10 @@
     visibility:hidden;
     z-index: -1;
 }
+#ProfileImage{
+    height: 20vh;
+    width: 20vh;
+}
 #InternshipCard {
     position:relative;
     z-index: 1;
@@ -29,7 +33,7 @@
 }
 #buttons {
     position:relative;
-    top: -30vh;
+    bottom: 40vh;
 }
 #footer {
     text-align:center;
