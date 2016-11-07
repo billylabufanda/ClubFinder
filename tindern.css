@@ -2,7 +2,7 @@
     text-align: center;
     visibility: hidden;
 }
-#InternshipLogoIMG{
+#InternshipLogoIMG {
     height: 20vh;
     width: 20vh;
 }
@@ -16,6 +16,7 @@
 }
 #internshipCardAttributesList {
     font-size: large;
+    z-index:1;
 }
 #ProfileCard {
     position:relative;
@@ -23,7 +24,7 @@
     visibility:hidden;
     z-index: -1;
 }
-#ProfileImage{
+#ProfileImage {
     height: 20vh;
     width: 20vh;
 }
@@ -34,6 +35,12 @@
 #FilterCard {
     position:relative;
     z-index:1;
+}
+#internshipCardAdditionalInfo {
+    position:relative;
+    z-index:-1;
+    bottom: 45vh;
+    visibility:hidden;
 }
 #buttons {
     position:relative;
