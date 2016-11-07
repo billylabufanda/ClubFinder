@@ -214,7 +214,35 @@
                     }
                 }
             }
-            //Showing the Google Profile
+            //Showing Additional Info
+        var additionalInfoButtonHTML = document.getElementById("AdditionalInternshipInfoButton");
+        let internshipAdditionalInfoCard = document.getElementById("internshipCardAdditionalInfo")
+        let internshipCardBasicProfile = document.getElementById("internshipCardAttributesList");
+        let additionalInfoBoolean = true
+        additionalInfoButtonHTML.addEventListener("click", showAdditionalInfo);
+
+        function showAdditionalInfo() {
+            let InternshipContactHTML = document.getElementById("InternshipContact")
+            let InternshipJobDescriptionHTML = document.getElementById("InternshipJobDescription")
+            let InternshipNumberofStudentsHTML = document.getElementById("InternshipNumberofStudents")
+            if(additionalInfoBoolean) {
+                internshipAdditionalInfoCard.style.zIndex = "1";
+                internshipCardBasicProfile.style.zIndex = "-1";
+                internshipAdditionalInfoCard.style.visibility = "visible"
+                internshipCardBasicProfile.style.visibility = "hidden"
+                InternshipContactHTML.innerHTML = "Contact Information: " + internshipObjects[currentInternshipNumber].contactInfo
+                InternshipJobDescriptionHTML.innerHTML = "Job Description: " + internshipObjects[currentInternshipNumber].jobDescription
+                InternshipNumberofStudentsHTML.innerHTML = "Number of Students Possible: " + internshipObjects[currentInternshipNumber].numberofStudents
+                additionalInfoBoolean = false
+            } else {
+                internshipAdditionalInfoCard.style.zIndex = "-1";
+                internshipCardBasicProfile.style.zIndex = "1";
+                internshipAdditionalInfoCard.style.visibility = "hidden"
+                internshipCardBasicProfile.style.visibility = "visible"
+                additionalInfoBoolean = true
+            }
+        }
+        //Showing the Google Profile
         var profileButtonHTML = document.getElementById("viewProfilePage")
         profileButtonHTML.addEventListener("click", renderProfile);
         var buttonClickBoolean = true
