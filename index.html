@@ -4,7 +4,7 @@
     <title></title>
     <link rel="stylesheet" type="text/css" href="tindern.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,7 +30,7 @@
             <div class="page-content">
                 <div id="InternshipCardandFilters" class="mdl-grid">
                     <!--Internship Filter -->
-                    <div id = "FilterCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--6-col">
+                    <div id="FilterCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--6-col">
                         <div class="mdl-card__title mdl-card--border">
                             <h1 class="mdl-card__title-text">Filter Fields:</h1>
                         </div>
@@ -62,27 +62,32 @@
                         </div>
                     </div>
                     <!--Internship Card -->
-                    <div id = "InternshipCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--6-col">
+                    <div id="InternshipCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--6-col">
                         <div class="mdl-card__title mdl-card--border">
                             <h1 id="InternshipCardHeader" class="mdl-card__title-text">Internship:</h1>
+                            <div class="mdl-layout-spacer"></div>
+                            <button class="mdl-button mdl-js-button mdl-button--raised">
+                                View Additional Information
+                            </button>
                         </div>
                         <div id="internshipCardAttributesList" class="mdl-card__supporting-text">
                             <p id="InternshipName"></p>
                             <p id="InternshipInterest"></p>
-                            <p id="InternshipSize"></p>
                             <p id="InternshipLocation"></p>
+                            <p id="InternshipLogoText">Internship Logo:</p>
+                            <img id="InternshipLogoIMG" src="http://www.logologo.com/logos/generic-globe-vector-logo.jpg">
                         </div>
                     </div>
                     <!-- Profile Page -->
-                    <div id = "ProfileCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--12-col">
+                    <div id="ProfileCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--12-col">
                         <div class="mdl-card__title mdl-card--border">
                             <h1 id="ProfileCardHeader" class="mdl-card__title-text">Profile:</h1>
                         </div>
                         <div id="ProfileCardAttributesList" class="mdl-card__supporting-text">
                             <p id="ProfileName">Chuck Norris</p>
                             <p id="ProfileEmail">chucknorris@hotmail.com</p>
-                            <p id="ProfileImageText">Profile Picture: </p>
-                            <img id = "ProfileImage" src="https://i.ytimg.com/vi/kxfeTcty3Do/maxresdefault.jpg" alt="Mountain View" class = "mdl-card__media">
+                            <p id="ProfileImageText">Profile Picture:</p>
+                            <img id="ProfileImage" src="https://i.ytimg.com/vi/kxfeTcty3Do/maxresdefault.jpg" alt="Mountain View" class="mdl-card__media">
                         </div>
                     </div>
                 </div>
