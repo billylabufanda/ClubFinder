@@ -2,6 +2,10 @@
     text-align: center;
     visibility: hidden;
 }
+#InternshipLogoIMG{
+    height: 20vh;
+    width: 20vh;
+}
 .mdl-navigation__link:hover {
     background-color:#293ea5;
     transition:.2s;
@@ -33,7 +37,7 @@
 }
 #buttons {
     position:relative;
-    bottom: 40vh;
+    bottom: 50vh;
 }
 #footer {
     text-align:center;
