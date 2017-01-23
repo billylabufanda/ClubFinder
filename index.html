@@ -1,125 +1,185 @@
 <html>
 
-<head>
-    <title></title>
-    <link rel="stylesheet" type="text/css" href="tindern.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-signin-client_id" content="246642128409-e40kacpi2192l87tcf7rnbvvqmqu94p4.apps.googleusercontent.com">
-</head>
+  <head>
+    <title>2017 WIP</title>
+    <link rel="stylesheet" type="text/css" href="/index.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+      crossorigin="anonymous">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+      <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="google-signin-client_id" content="246642128409-e40kacpi2192l87tcf7rnbvvqmqu94p4.apps.googleusercontent.com"> </head>
 
-<body id="mainpage">
+  <body id="mainpage">
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-        <div>
-            <header class="mdl-layout__header">
-                <div class="mdl-layout__header-row">
-                    <span class="mdl-layout__title">Tindernship</span>
-                    <div class="mdl-layout-spacer"></div>
-                    <nav class="mdl-navigation">
-                        <a id="viewSavedInternships" class="mdl-navigation__link"> Saved Internships</a>
-                        <a id="viewProfilePage" class="mdl-navigation__link">Profile Page</a>
-                        <a class="mdl-navigation__link" id="google-signin-button"></a>
-                    </nav>
-                </div>
-            </header>
+      <header class="mdl-layout__header">
+        <div class="mdl-layout__header-row">
+          <span id="WebsiteTitle" class="mdl-layout__title">Tindernship</span>
+          <div class="mdl-layout-spacer"></div>
+          <nav class="mdl-navigation">
+            <a class="mdl-navigation__link" id="google-signin-button"></a>
+            <a id="viewSavedInternships" class="mdl-navigation__link">Saved Internships</a>
+            <a id="viewProfilePage" class="mdl-navigation__link">Profile Page</a>
+          </nav>
         </div>
-        <main class="mdl-layout__content">
-            <div class="page-content">
-                <div id="InternshipCardandFilters" class="mdl-grid">
-                    <!--Internship Filter -->
-                    <div id="FilterCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--6-col">
-                        <div class="mdl-card__title mdl-card--border">
-                            <h1 class="mdl-card__title-text">Filter Fields:</h1>
-                        </div>
-                        <div class="mdl-card__supporting-text">
-                            <ul id="listOfFilters">
-                                <span class="glyphicon glyphicon-ok checkmarkVisual">Animal</span> 
-                                <br>
-                                <span class="glyphicon glyphicon-ok checkmarkVisual">Architecture</span> 
-                                <br>
-                                <span class="glyphicon glyphicon-ok checkmarkVisual">Art</span> 
-                                <br>
-                                <span class="glyphicon glyphicon-ok checkmarkVisual">Education</span> 
-                                <br>
-                                <span class="glyphicon glyphicon-ok checkmarkVisual">Engineering</span> 
-                                <br>
-                                <span class="glyphicon glyphicon-ok checkmarkVisual">Healthcare</span> 
-                                <br>
-                                <span class="glyphicon glyphicon-ok checkmarkVisual">Law</span> 
-                                <br>
-                                <span class="glyphicon glyphicon-ok checkmarkVisual">Science</span> 
-                                <br>
-                                <span class="glyphicon glyphicon-ok checkmarkVisual">Social Services</span> 
-                                <br>
-                                <span class="glyphicon glyphicon-ok checkmarkVisual">Technology</span> 
-                                <br>
-                                <span class="glyphicon glyphicon-ok checkmarkVisual">Youth Development</span> 
-                                <br>
-                            </ul>
-                        </div>
-                    </div>
-                    <!--Internship Card -->
-                    <div id="InternshipCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--6-col">
-                        <div class="mdl-card__title mdl-card--border">
-                            <h1 id="InternshipCardHeader" class="mdl-card__title-text">Internship:</h1>
-                            <div class="mdl-layout-spacer"></div>
-                            <button id="AdditionalInternshipInfoButton" class="mdl-button mdl-js-button mdl-button--raised">
-                                View Additional Information
-                            </button>
-                        </div>
-                        <div id="internshipCardAttributesList" class="mdl-card__supporting-text">
-                            <p id="InternshipName"></p>
-                            <p id="InternshipInterest"></p>
-                            <p id="InternshipLocation"></p>
-                            <p id="InternshipLogoText">Internship Logo:</p>
-                            <img id="InternshipLogoIMG" src="http://www.logologo.com/logos/generic-globe-vector-logo.jpg">
-                        </div>
-                        <div id="internshipCardAdditionalInfo" class="mdl-card__supporting-text">
-                            <p id="InternshipContact">Hi</p>
-                            <p id="InternshipNumberofStudents">Boop</p>
-                            <p id="InternshipJobDescription">Beep</p>
-                        </div>
-                    </div>
-                    <!-- Profile Page -->
-                    <div id="ProfileCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--12-col">
-                        <div class="mdl-card__title mdl-card--border">
-                            <h1 id="ProfileCardHeader" class="mdl-card__title-text">Profile:</h1>
-                        </div>
-                        <div id="ProfileCardAttributesList" class="mdl-card__supporting-text">
-                            <p id="ProfileName">Chuck Norris</p>
-                            <p id="ProfileEmail">chucknorris@hotmail.com</p>
-                            <p id="ProfileImageText">Profile Picture:</p>
-                            <img id="ProfileImage" src="https://i.ytimg.com/vi/kxfeTcty3Do/maxresdefault.jpg" alt="Mountain View" class="mdl-card__media">
-                        </div>
-                    </div>
+      </header>
+      <main class="mdl-layout__content">
+        <div class="page-content">
+          <div id="InternshipCardandFilters" class="mdl-grid">
+            <!--Internship Filter -->
+            <div id="FilterCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--6-col">
+              <div class="mdl-card__title mdl-card--border">
+                <h1 class="mdl-card__title-text">Filter Fields:</h1>
+              </div>
+              <!--<ul id="listOfFilters">-->
+              <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Animal</span>-->
+              <!--    <br>-->
+              <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Architecture</span>-->
+              <!--    <br>-->
+              <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Art</span>-->
+              <!--    <br>-->
+              <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Education</span>-->
+              <!--    <br>-->
+              <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Engineering</span>-->
+              <!--    <br>-->
+              <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Healthcare</span>-->
+              <!--    <br>-->
+              <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Law</span>-->
+              <!--    <br>-->
+              <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Science</span>-->
+              <!--    <br>-->
+              <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Social Services</span>-->
+              <!--    <br>-->
+              <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Technology</span>-->
+              <!--    <br>-->
+              <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Youth Development</span>-->
+              <!--    <br>-->
+              <!--</ul>-->
+              <div id="FilterTabs" class="mdl-card__supporting-text">
+                <div class="mdl-tabs mdl-js-tabs">
+                  <div class="mdl-tabs__tab-bar">
+                    <a href="#tab1" class="mdl-tabs__tab">Interests</a>
+                    <a href="#tab2" class="mdl-tabs__tab">Work Type</a>
+                    <a href="#tab3" class="mdl-tabs__tab">Location</a>
+                  </div>
+                  <div class="mdl-tabs__panel is-active" id="tab1">
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="Interest-switch-1">
+                      <input type="checkbox" id="Interest-switch-1" class="mdl-switch__input" checked>
+                      <span class="mdl-switch__label">Animal</span>
+                    </label>
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="Interest-switch-2">
+                      <input type="checkbox" id="Interest-switch-2" class="mdl-switch__input" checked>
+                      <span class="mdl-switch__label">Science</span>
+                    </label>
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="Interest-switch-3">
+                      <input type="checkbox" id="Interest-switch-3" class="mdl-switch__input" checked>
+                      <span class="mdl-switch__label">Sports</span>
+                    </label>
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="Interest-switch-4">
+                      <input type="checkbox" id="Interest-switch-4" class="mdl-switch__input" checked>
+                      <span class="mdl-switch__label">Healthcare</span>
+                    </label>
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="Interest-switch-5">
+                      <input type="checkbox" id="Interest-switch-5" class="mdl-switch__input" checked>
+                      <span class="mdl-switch__label">Technology</span>
+                    </label>
+                  </div>
+                  <div class="mdl-tabs__panel" id="tab2">
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="WT-switch-1">
+                      <input type="checkbox" id="WT-switch-1" class="mdl-switch__input" checked>
+                      <span class="mdl-switch__label">Research</span>
+                    </label>
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="WT-switch-2">
+                      <input type="checkbox" id="WT-switch-2" class="mdl-switch__input" checked>
+                      <span class="mdl-switch__label">Management</span>
+                    </label>
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="WT-switch-3">
+                      <input type="checkbox" id="WT-switch-3" class="mdl-switch__input" checked>
+                      <span class="mdl-switch__label">Direct Assistance</span>
+                    </label>
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="WT-switch-4">
+                      <input type="checkbox" id="WT-switch-4" class="mdl-switch__input" checked>
+                      <span class="mdl-switch__label">Outreach</span>
+                    </label>
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="WT-switch-5">
+                      <input type="checkbox" id="WT-switch-5" class="mdl-switch__input" checked>
+                      <span class="mdl-switch__label">Teaching/Mentorship</span>
+                    </label>
+                  </div>
+                  <div class="mdl-tabs__panel" id="tab3">
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="Location-switch-1">
+                      <input type="checkbox" id="Location-switch-1" class="mdl-switch__input" checked>
+                      <span class="mdl-switch__label">San Francisco</span>
+                    </label>
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="Location-switch-2">
+                      <input type="checkbox" id="Location-switch-2" class="mdl-switch__input" checked>
+                      <span class="mdl-switch__label">Daly City</span>
+                    </label>
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="Location-switch-3">
+                      <input type="checkbox" id="Location-switch-3" class="mdl-switch__input" checked>
+                      <span class="mdl-switch__label">Burlingame</span>
+                    </label>
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="Location-switch-4">
+                      <input type="checkbox" id="Location-switch-4" class="mdl-switch__input" checked>
+                      <span class="mdl-switch__label">San Mateo</span>
+                    </label>
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="Location-switch-5">
+                      <input type="checkbox" id="Location-switch-5" class="mdl-switch__input" checked>
+                      <span class="mdl-switch__label">Redwood City</span>
+                    </label>
+                  </div>
                 </div>
-                <div id="buttons" class="mdl-grid">
-                    <button id="nextInternshipButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised mdl-cell mdl-cell--6-col">
-                        Next Internship
-                    </button>
-                    <button id="saveInternshipButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised mdl-cell mdl-cell--6-col">
-                        Save Internship for Later Viewing
-                    </button>
-                    <!--                 <button id="placeholderButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised">
+              </div>
+            </div>
+            <!--Internship Card -->
+            <div id="InternshipCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--6-col">
+              <div class="mdl-card__title mdl-card--border">
+                <h1 id="InternshipCardHeader" class="mdl-card__title-text">Internship:</h1>
+                <div class="mdl-layout-spacer"></div>
+                <button id="AdditionalInternshipInfoButton" class="mdl-button mdl-js-button mdl-button"> View Additional Information </button>
+              </div>
+              <div id="internshipCardAttributesList" class="mdl-card__supporting-text">
+                <p id="InternshipName"></p>
+                <p id="InternshipInterest"></p>
+                <p id="InternshipLocation"></p>
+                <p id="InternshipLogoText">Internship Logo:</p>
+                <img id="InternshipLogoIMG" src="http://www.logologo.com/logos/generic-globe-vector-logo.jpg"> </div>
+              <div id="internshipCardAdditionalInfo" class="mdl-card__supporting-text">
+                <p id="InternshipContact">Hi</p>
+                <p id="InternshipNumberofStudents">Boop</p>
+                <p id="InternshipJobDescription">Beep</p>
+              </div>
+            </div>
+            <!-- Profile Page -->
+            <div id="ProfileCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--12-col">
+              <div class="mdl-card__title mdl-card--border">
+                <h1 id="ProfileCardHeader" class="mdl-card__title-text">Profile:</h1>
+              </div>
+              <div id="ProfileCardAttributesList" class="mdl-card__supporting-text">
+                <p id="ProfileName">Chuck Norris</p>
+                <p id="ProfileEmail">chucknorris@hotmail.com</p>
+                <p id="ProfileImageText">Profile Picture:</p>
+                <img id="ProfileImage" src="https://i.ytimg.com/vi/kxfeTcty3Do/maxresdefault.jpg" alt="Mountain View"
+                  class="mdl-card__media">
+              </div>
+            </div>
+          </div>
+          <div id="buttons" class="mdl-grid">
+            <button id="nextInternshipButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised mdl-cell mdl-cell--6-col">
+            Next Internship </button>
+            <button id="saveInternshipButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised mdl-cell mdl-cell--6-col">
+            Save Internship for Later Viewing </button>
+            <!--                 <button id="placeholderButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised">
                     Click for saved internships
                 </button> -->
-                </div>
-                <div id="footer">
-                    Made By William McEachen
-                </div>
-
-            </div>
-        </main>
+          </div>
+          <div id="footer"> Made By William McEachen </div>
+        </div>
+      </main>
     </div>
-
-
-
-    <script src='tindern.js'></script>
+    <script src="/index.js"></script>
     <script src="https://apis.google.com/js/platform.js?onload=goGoGoogle" async defer></script>
     <script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
-</body>
-
+  </body>
 </html>

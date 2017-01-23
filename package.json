@@ -1,0 +1,22 @@
+{
+  "name": "tindernship",
+  "version": "1.0.0",
+  "description": "TODO",
+  "main": "index.js",
+  "scripts": {
+    "start": "serve ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/billylabufanda/billylabufanda.github.io.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/billylabufanda/billylabufanda.github.io/issues"
+  },
+  "homepage": "https://github.com/billylabufanda/billylabufanda.github.io#readme",
+  "devDependencies": {
+    "serve": "^2.4.3"
+  }
+}
