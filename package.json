@@ -4,7 +4,7 @@
   "description": "TODO",
   "main": "index.js",
   "scripts": {
-    "start": "serve ."
+    "start": "serve . -p 8000"
   },
   "repository": {
     "type": "git",

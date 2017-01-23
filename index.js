@@ -383,6 +383,16 @@ function onSuccess(googleUser) {
   userData.profileURL = profile.getImageUrl()
   userData.email = profile.getEmail()
   console.log("Name: hi this is a test " + userData.name)
+  gapi.client.request({
+    path: "https://sheets.googleapis.com/v4/spreadsheets/1KEq57KSQhrpC41ZNUk7_gip3dgc0KiI1qrHlFQrh_hY",
+    method: "GET",
+    // paramsobject: {
+    //   "ranges": "1234"
+    // }
+  }).then(spreadsheet => {
+    // spreadsheet is a spreadsheet
+    console.log(JSON.stringify(spreadsheet))
+  })
 }
 
 function onFailure(error) {
