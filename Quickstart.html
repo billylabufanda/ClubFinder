@@ -1,6 +1,7 @@
 <html>
-  <head>
-    <script type="text/javascript">
+
+<head>
+  <script type="text/javascript">
       // Your Client ID can be retrieved from your project in the Google
       // Developer Console, https://console.developers.google.com
       var CLIENT_ID = '246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com';
@@ -44,7 +45,7 @@
        */
       function handleAuthClick(event) {
         gapi.auth.authorize(
-          {client_id: CLIENT_ID, scope: SCOPES, immediate: false},
+          { client_id: CLIENT_ID, scope: SCOPES, immediate: false },
           handleAuthResult);
         return false;
       }
@@ -54,7 +55,7 @@
        */
       function loadSheetsApi() {
         var discoveryUrl =
-            'https://sheets.googleapis.com/$discovery/rest?version=v4';
+          'https://sheets.googleapis.com/$discovery/rest?version=v4';
         gapi.client.load(discoveryUrl).then(listMajors);
       }
 
@@ -66,7 +67,7 @@
         gapi.client.sheets.spreadsheets.values.get({
           spreadsheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
           range: 'Class Data!A2:E',
-        }).then(function(response) {
+        }).then(function (response) {
           var range = response.result;
           if (range.values.length > 0) {
             appendPre('Name, Major:');
@@ -79,7 +80,7 @@
           } else {
             appendPre('No data found.');
           }
-        }, function(response) {
+        }, function (response) {
           appendPre('Error: ' + response.result.error.message);
         });
       }
@@ -98,17 +99,18 @@
 
 
     </script>
-    <script src="https://apis.google.com/js/client.js?onload=checkAuth">
+<script src="https://apis.google.com/js/client.js?onload=checkAuth">
     </script>
-  </head>
-  <body>
-    <div id="authorize-div" style="display: none">
-      <span>Authorize access to Google Sheets API</span>
-      <!--Button for the user to click to initiate auth sequence -->
-      <button id="authorize-button" onclick="handleAuthClick(event)">
-        Authorize
-      </button>
-    </div>
-    <pre id="output"></pre>
-  </body>
+</head>
+
+<body>
+  <div id="authorize-div" style="display: none">
+<span>Authorize access to Google Sheets API</span>
+<!--Button for the user to click to initiate auth sequence -->
+<button id="authorize-button" onclick="handleAuthClick(event)"> Authorize
+</button>
+</div>
+<pre id="output"></pre>
+</body>
+
 </html>

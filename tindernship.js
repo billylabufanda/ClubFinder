@@ -1,7 +1,18 @@
-(function () {
+/*
+
+init: if you're not logged in, only show the login button
+auth: auth the user with gapi
+load client: load the gapi spreadsheet client
+load data: load the internships sheet 
+load prefs: load the user's prior state
+display: display the switches/preferences/internships that match
+
+*/
+window.renderTindernship = function () {
   //Some Variables
   var hiddenInternshipObjects = [];
   //Calls JSON 
+  // TODO: Make this use the sheets API properly
   $.getJSON("https://spreadsheets.google.com/feeds/list/1KiBBwtRUjufhhD5FOwC0b37asXf48Ug1m8zL5WrHCBA/default/public/values?alt=json", function (data) {
     class Internship {
       constructor(entry) {
@@ -18,6 +29,7 @@
     //This is the object that is displayed, it is based on currentInternship, a value in the array of internshipObjects
     var nextInternship;
     var currentInternshipNumber = 0;
+    // TODO: use jquery selectors
     var nextInternshipButton = document.getElementById("nextInternshipButton");
     var InternshipNameHTML = document.getElementById("InternshipName");
     var InternshipInterestHTML = document.getElementById("InternshipInterest");
@@ -128,6 +140,12 @@
         addEventListener(toggleHTML[i], i);
       }
     }
+
+    // TODO: don't name-collide on something in window
+    // switch to jquery if you like: $("#my-id").click(() => console.log("boom"))
+    // switch to jquery if you like: $("#my-id").click(() => {
+    //   console.log("boom")
+    // })
 
     function addEventListener(element, index) {
       console.log("addEventListenerfunctiontest");
@@ -362,52 +380,5 @@
       // placeholderButton.innerHTML = "Saved Internships"
       renderInternship();
     }
-
-
   })
-})();
-var userData = {
-  name: "Chuck Norris",
-  profileURL: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/M101_hires_STScI-PRC2006-10a.jpg/1280px-M101_hires_STScI-PRC2006-10a.jpg",
-  email: "chucknorris@hotmail.com"
-  //     savedInternships:
-}
-
-function onSuccess(googleUser) {
-  console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
-  var profile = googleUser.getBasicProfile();
-  console.log('Name: ' + profile.getName());
-  console.log('Image URL: ' + profile.getImageUrl());
-  console.log('Email: ' + profile.getEmail());
-  userData.name = profile.getName()
-  userData.profileURL = profile.getImageUrl()
-  userData.email = profile.getEmail()
-  console.log("Name: hi this is a test " + userData.name)
-  gapi.client.request({
-    path: "https://sheets.googleapis.com/v4/spreadsheets/1KEq57KSQhrpC41ZNUk7_gip3dgc0KiI1qrHlFQrh_hY",
-    method: "GET",
-    // paramsobject: {
-    //   "ranges": "1234"
-    // }
-  }).then(spreadsheet => {
-    // spreadsheet is a spreadsheet
-    console.log(JSON.stringify(spreadsheet))
-  })
-}
-
-function onFailure(error) {
-  console.log(error);
-}
-
-function goGoGoogle() {
-  gapi.signin2.render('google-signin-button', {
-    'scope': 'profile email',
-    'width': 240,
-    'height': 25,
-    'longtitle': true,
-    'theme': 'dark',
-    'onsuccess': onSuccess,
-    'onfailure': onFailure
-  });
-  console.log('did it go?');
 }
