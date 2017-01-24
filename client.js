@@ -5,7 +5,7 @@ var userData = {
   //     savedInternships:
 }
 const CLIENT_ID = '246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com';
-const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets";
+const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive";
 async function onSuccess(googleUser) {
 
   /** Base scope **/
@@ -25,7 +25,7 @@ async function onSuccess(googleUser) {
     'client_id': CLIENT_ID,
     'scope': SCOPES,
     'immediate': true
-  }, loadSheetsApi);
+  }, loadClients);
   console.log("rendering tindernship")
   try {
     window.renderTindernship()
@@ -45,15 +45,45 @@ async function onSuccess(googleUser) {
   })
 }
 
+class Deferred {
+  constructor() {
+    this._fulfilled = false;
+    this.promise = new Promise((resolve, reject) => {
+      this._resolve = resolve;
+      this._reject = reject;
+    });
+  }
+  get fulfilled() {
+    return this._fulfilled;
+  }
+  resolve(value) {
+    this._fulfilled = true;
+    this._resolve(value);
+  }
+  reject(reason) {
+    this._fulfilled = true;
+    this._reject(reason);
+  }
+}
+
+const driveClientLoaded = new Deferred()
+const sheetClientLoaded = new Deferred()
+
 /**
  * Load Sheets API client library.
  */
-function loadSheetsApi() {
-  var discoveryUrl = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
-  return gapi.client.load(discoveryUrl).then(withSheetApi)
+async function loadClients() {
+  console.log("loading clients");
+  await gapi.client.load('sheets', 'v4');
+  sheetClientLoaded.resolve();
+  console.log("loaded sheet client")
+  await gapi.client.load('drive', 'v3');
+  driveClientLoaded.resolve();
+  console.log("loaded drive client")
 }
 
-function withSheetApi() {
+async function loadSampleSheet() {
+  await sheetClientLoaded.promise
   return gapi.client.sheets.spreadsheets.values.get({
     spreadsheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
     range: 'Class Data!A2:E',
@@ -67,6 +97,8 @@ function withSheetApi() {
     }
   })
 }
+
+loadSampleSheet()
 
 function onFailure(error) {
   console.log(error);
