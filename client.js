@@ -4,13 +4,15 @@ var userData = {
   email: "chucknorris@hotmail.com"
   //     savedInternships:
 }
-
+const CLIENT_ID = '246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com';
+const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets";
 async function onSuccess(googleUser) {
 
   /** Base scope **/
 
   console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
   var profile = googleUser.getBasicProfile();
+  console.log(JSON.stringify(googleUser))
   console.log('Name: ' + profile.getName());
   console.log('Image URL: ' + profile.getImageUrl());
   console.log('Email: ' + profile.getEmail());
@@ -19,8 +21,11 @@ async function onSuccess(googleUser) {
   userData.email = profile.getEmail()
   console.log("Name: hi this is a bad test " + userData.name)
 
-  await loadSheetsApi().then(withSheetApi);
-
+  gapi.auth.authorize({
+    'client_id': CLIENT_ID,
+    'scope': SCOPES,
+    'immediate': true
+  }, loadSheetsApi);
   console.log("rendering tindernship")
   try {
     window.renderTindernship()
@@ -45,7 +50,7 @@ async function onSuccess(googleUser) {
  */
 function loadSheetsApi() {
   var discoveryUrl = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
-  return gapi.client.load(discoveryUrl)
+  return gapi.client.load(discoveryUrl).then(withSheetApi)
 }
 
 function withSheetApi() {
@@ -56,6 +61,7 @@ function withSheetApi() {
     var range = response.result;
     if (range.values.length > 0) {
       for (i = 0; i < range.values.length; i++) {
+        var row = range.values[i];
         console.log(JSON.stringify(row))
       }
     }
@@ -68,7 +74,7 @@ function onFailure(error) {
 
 function goGoGoogle() {
   gapi.signin2.render('google-signin-button', {
-    'scope': "profile email https://www.googleapis.com/auth/spreadsheets",
+    'scope': SCOPES,
     'width': 240,
     'height': 25,
     'longtitle': true,
