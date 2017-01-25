@@ -1,3 +1,4 @@
+// TODO: replace with (await user)
 var userData = {
   name: "Chuck Norris",
   profileURL: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/M101_hires_STScI-PRC2006-10a.jpg/1280px-M101_hires_STScI-PRC2006-10a.jpg",
@@ -6,44 +7,6 @@ var userData = {
 }
 const CLIENT_ID = '246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com';
 const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive";
-async function onSuccess(googleUser) {
-
-  /** Base scope **/
-
-  console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
-  var profile = googleUser.getBasicProfile();
-  console.log(JSON.stringify(googleUser))
-  console.log('Name: ' + profile.getName());
-  console.log('Image URL: ' + profile.getImageUrl());
-  console.log('Email: ' + profile.getEmail());
-  userData.name = profile.getName()
-  userData.profileURL = profile.getImageUrl()
-  userData.email = profile.getEmail()
-  console.log("Name: hi this is a bad test " + userData.name)
-
-  gapi.auth.authorize({
-    'client_id': CLIENT_ID,
-    'scope': SCOPES,
-    'immediate': true
-  }, loadClients);
-  console.log("rendering tindernship")
-  try {
-    window.renderTindernship()
-  } catch (error) {
-    console.log("Bummer: " + error)
-  }
-
-  gapi.client.request({
-    path: "https://sheets.googleapis.com/v4/spreadsheets/1KEq57KSQhrpC41ZNUk7_gip3dgc0KiI1qrHlFQrh_hY",
-    method: "GET",
-    // paramsobject: {
-    //   "ranges": "1234"
-    // }
-  }).then(spreadsheet => {
-    // spreadsheet is a spreadsheet
-    console.log(JSON.stringify(spreadsheet))
-  })
-}
 
 class Deferred {
   constructor() {
@@ -66,39 +29,122 @@ class Deferred {
   }
 }
 
-const driveClientLoaded = new Deferred()
-const sheetClientLoaded = new Deferred()
+const deferredUser = new Deferred();
+const user = deferredUser.promise;
+const driveClientLoaded = new Deferred();
+const sheetClientLoaded = new Deferred();
 
 /**
  * Load Sheets API client library.
  */
-async function loadClients() {
-  console.log("loading clients");
-  await gapi.client.load('sheets', 'v4');
-  sheetClientLoaded.resolve();
-  console.log("loaded sheet client")
-  await gapi.client.load('drive', 'v3');
-  driveClientLoaded.resolve();
-  console.log("loaded drive client")
+function loadClients() {
+  sheetClientLoaded.resolve(
+    gapi.client.load('https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest')
+  );
+  driveClientLoaded.resolve(
+    gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest')
+  );
 }
 
-async function loadSampleSheet() {
-  await sheetClientLoaded.promise
-  return gapi.client.sheets.spreadsheets.values.get({
-    spreadsheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
-    range: 'Class Data!A2:E',
-  }).then(function (response) {
-    var range = response.result;
-    if (range.values.length > 0) {
-      for (i = 0; i < range.values.length; i++) {
-        var row = range.values[i];
-        console.log(JSON.stringify(row))
-      }
+/**
+ * Find or Create the Spreadsheet
+ */
+const deferredSpreadsheetId = new Deferred();
+const spreadsheetId = deferredSpreadsheetId.promise
+
+async function fetchSpreadsheetId() {
+  await driveClientLoaded.promise;
+  await sheetClientLoaded.promise;
+
+  // Does the sheet exist already?
+  const deferredFiles = new Deferred()
+  gapi.client.drive.files.list({
+    pageSize: 1,
+    q: `properties has { key='InternshipsFor' and value='${(await user).getEmail()}'}`,
+  }).execute(result => deferredFiles.resolve(result.files));
+
+  const files = await deferredFiles.promise
+
+  if (files && files.length == 1) {
+    deferredSpreadsheetId.resolve(files[0].id)
+    console.log("Found prior Sheet " + files[0].id);
+    return
+  }
+
+  // Darn, we have to create it:
+
+  const response = await gapi.client.sheets.spreadsheets.create({
+    "properties": {
+      "title": `Tindernship Profile for ${(await user).getName()}`
     }
+  })
+
+  const spreadsheetId = response.result.spreadsheetId
+
+  // And set the metadata to find it later
+
+  gapi.client.drive.files.update({
+    fileId: spreadsheetId,
+    properties: {
+      InternshipsFor: (await user).getEmail()
+    }
+  }).execute(result => {
+    deferredSpreadsheetId.resolve(spreadsheetId)
+    console.log("Created new sheet " + spreadsheetId);
   })
 }
 
-loadSampleSheet()
+
+fetchSpreadsheetId();
+
+async function onSuccess(googleUser) {
+  deferredUser.resolve(googleUser.getBasicProfile());
+
+  /** Base scope **/
+
+  console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
+  const profile = googleUser.getBasicProfile();
+  console.log(JSON.stringify(googleUser))
+  console.log('Name: ' + profile.getName());
+  console.log('Image URL: ' + profile.getImageUrl());
+  console.log('Email: ' + profile.getEmail());
+  userData.name = profile.getName();
+  userData.profileURL = profile.getImageUrl();
+  userData.email = profile.getEmail();
+
+  gapi.auth.authorize({
+    'client_id': CLIENT_ID,
+    'scope': SCOPES,
+    'immediate': true
+  }, loadClients);
+  // console.log("rendering tindernship")
+  // try {
+  //   window.renderTindernship()
+  // } catch (error) {
+  //   console.log("Bummer: " + error)
+  // }
+}
+
+// /**
+//  *Sample Function
+//  */
+// async function loadSampleSheet() {
+//   await sheetClientLoaded.promise
+//   return gapi.client.sheets.spreadsheets.values.get({
+//     spreadsheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
+//     range: 'Class Data!A2:E',
+//   }).then(function (response) {
+//     var range = response.result;
+//     if (range.values.length > 0) {
+//       for (i = 0; i < range.values.length; i++) {
+//         var row = range.values[i];
+//         console.log(JSON.stringify(row))
+//       }
+//     }
+//   })
+// }
+
+// loadSampleSheet()
 
 function onFailure(error) {
   console.log(error);
