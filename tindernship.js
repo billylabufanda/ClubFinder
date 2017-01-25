@@ -25,7 +25,7 @@ window.renderTindernship = function () {
         this.logo = entry.gsx$logo.$t
       }
     }
-    var internshipObjects = data.feed.entry.map(e => new Internship(e))
+    let internshipObjects = data.feed.entry.map(e => new Internship(e))
     //This is the object that is displayed, it is based on currentInternship, a value in the array of internshipObjects
     var nextInternship;
     var currentInternshipNumber = 0;

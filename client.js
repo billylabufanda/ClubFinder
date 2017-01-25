@@ -102,17 +102,162 @@ fetchSpreadsheetId();
  1) The Page needs to show the first item
  2) On button click, the page needs to show the next item
  3) So run a function that displays the internship once, and then have the function increase every time button
+ Ok New Plan with Dad time:
+Make a class of internships
+Each internship is aware of its filterability
+
+Read spreadsheet
+ Array of internships
+ Things to filter against
+If logged in, apply saved state
+ What filters are selected
+ What internships are saved
+Render the UI
+ Set filters to saved state
+ Render the first internship that meets current filters
+
  */
 
-const entry = await gapi.client.sheets.spreadsheets.values.get({
-  "properties": {
-    "title": `Tindernship Profile for ${(await user).getName()}`
+/**
+ * Holds the types of a given kind of filter, like "location" or "interest" 
+ */
+class FilterSet {
+  constructor(name) {
+    this.name = name;
+    this.filterNameToInternships = new Map(); // "San Jose" => [Artik, MACLA]
+    this.checkedFilterNames = new Set();
   }
-})
 
+  /**
+   * Add the given internship as being associated to the given filterName.
+   * For example, Nine Lives Foundation would be associated with San Mateo.
+   */
+  addInternshipToFilter(internship, filterName) {
+    if (filterName.length > 0) {
+      if (!this.filterNameToInternships.has(filterName)) {
+        this.filterNameToInternships.set(filterName, [])
+      }
+      this.filterNameToInternships.get(filterName).push(internship)
+      this.setFilterChecked(filterName, true)
+    }
+  }
 
+  /**
+   * filterName is the name of a specific filter, like "San Francisco" or "Engineering".
+   * newCheckedValue is the current state of the filter checkbox/switch
+   */
+  setFilterChecked(filterName, isChecked) {
+    if (isChecked) {
+      this.checkedFilterNames.add(filterName)
+    } else {
+      this.checkedFilterNames.delete(filterName)
+    }
+  }
 
+  filterNames() {
+    return [...this.filterNameToInternships.keys()]
+  }
 
+  render() {
+    this.filterNames().sort().forEach(filterName => {
+      // "San Francisco" -> "filter-location-san-francisco"
+      const filterId = "filter-" + this.name + "-" + filterName.toLowerCase().replace(/[^a-z0-9 ]+/g, "").trim().replace(/ +/g, "-");
+      $("#" + this.name + "Tab").append(
+        `<label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="${filterId}">
+         <input type="checkbox" id="${filterId}" class="mdl-switch__input" checked>
+         <span class="mdl-switch__label">${filterName}</span>
+       </label>`
+      );
+      const self = this
+      $(`#${filterId}`).click(function () {
+        const checked = $(this).attr("checked")
+        console.log(filterId = " is now " + checked)
+        self.setFilterChecked(filterName, checked)
+      })
+    })
+  }
+
+  /**
+   * union of all internships for currently selected filters
+   */
+  selectedInternships() /* :Set<Internship> */ {
+    const selectedInternshipsSet = new Set()
+    this.checkedFilterNames.forEach(filterName => {
+      const internships = this.filterNameToInternships.get(filterName)
+      internships.forEach(internship =>
+        selectedInternshipsSet.add(internship)
+      )
+    })
+    return selectedInternshipsSet
+  }
+}
+
+const locations = new FilterSet("locations")
+const interests = new FilterSet("interests")
+const typesOfWork = new FilterSet("typesOfWork")
+
+class Internship {
+  constructor(entry) {
+    this.name = entry.gsx$nameofcompany.$t
+    this.location = entry.gsx$location.$t
+    this.location.split(",").forEach(ea => locations.addInternshipToFilter(this, ea.trim()))
+    this.interest = entry.gsx$fieldofinterest.$t
+    this.interest.split(",").forEach(ea => interests.addInternshipToFilter(this, ea.trim()))
+    this.jobDescription = entry.gsx$jobdescription.$t
+    this.contactInfo = entry.gsx$contactinformation.$t
+    this.typeOfWork = entry.gsx$typeofwork.$t
+    this.typeOfWork.split(",").forEach(ea => typesOfWork.addInternshipToFilter(this, ea.trim()))
+    this.numberofStudents = entry.gsx$numberofstudents.$t
+    this.logo = entry.gsx$logo.$t
+  }
+}
+
+/**
+ * Intersect an array of sets
+ */
+function intersect(arrayOfSets) {
+  const intersection = new Set()
+  const lastSet = arrayOfSets.pop()
+  for (element of lastSet) {
+    if (arrayOfSets.every(set => set.has(element))) {
+      intersection.add(element)
+    }
+  }
+  return intersection
+}
+
+/**
+ * @return an array holding only elements found in every element in `arrayOfSets`
+ */
+function intersect(arrayOfSets) {
+  return [...arrayOfSets.pop()].filter(element => arrayOfSets.every(set => set.has(element)))
+}
+
+const currentInternships = intersect([locations.selectedInternships(), interests.selectedInternships(), typesOfWork.selectedInternships()])
+
+const internshipObjects = new Deferred()
+
+//Create Internships Array from Sheet
+$.getJSON("https://spreadsheets.google.com/feeds/list/1KiBBwtRUjufhhD5FOwC0b37asXf48Ug1m8zL5WrHCBA/default/public/values?alt=json", function (data) {
+  try {
+    internshipObjects.resolve(data.feed.entry.map(e => new Internship(e)))
+    console.log("OK, done with parsing the sheet!")
+  } catch (error) {
+    alert("Couldn't load available internships. Sorry.")
+    console.log(error)
+  }
+});
+
+async function renderFilters() {
+  // Waiting for internshipObjects ensures filter sets are filled
+  await internshipObjects.promise;
+  console.log("rendering filters!")
+  locations.render();
+  interests.render();
+  typesOfWork.render();
+}
+
+renderFilters()
 
 /**
  * Save Internships to Spreadsheet
@@ -149,12 +294,6 @@ async function onSuccess(googleUser) {
     'scope': SCOPES,
     'immediate': true
   }, loadClients);
-  // console.log("rendering tindernship")
-  try {
-    window.renderTindernship()
-  } catch (error) {
-    console.log("Bummer: " + error)
-  }
 }
 
 function onFailure(error) {
