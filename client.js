@@ -93,10 +93,42 @@ async function fetchSpreadsheetId() {
     console.log("Created new sheet " + spreadsheetId);
   })
 }
-
-
 fetchSpreadsheetId();
 
+
+//Find and display internships from form sheet
+/**
+ *How things need to render:
+ 1) The Page needs to show the first item
+ 2) On button click, the page needs to show the next item
+ 3) So run a function that displays the internship once, and then have the function increase every time button
+ */
+
+const entry = await gapi.client.sheets.spreadsheets.values.get({
+  "properties": {
+    "title": `Tindernship Profile for ${(await user).getName()}`
+  }
+})
+
+
+
+
+
+/**
+ * Save Internships to Spreadsheet
+ */
+const sheetButton = $("saveToSheetButton")
+sheetButton.on("click", sheetButtonClick)
+
+function sheetButtonClick() {
+  consolelog(internshipObjects)
+}
+
+
+
+/**
+ *When Google Sign-in succeeds
+ */
 async function onSuccess(googleUser) {
   deferredUser.resolve(googleUser.getBasicProfile());
 
@@ -118,33 +150,12 @@ async function onSuccess(googleUser) {
     'immediate': true
   }, loadClients);
   // console.log("rendering tindernship")
-  // try {
-  //   window.renderTindernship()
-  // } catch (error) {
-  //   console.log("Bummer: " + error)
-  // }
+  try {
+    window.renderTindernship()
+  } catch (error) {
+    console.log("Bummer: " + error)
+  }
 }
-
-// /**
-//  *Sample Function
-//  */
-// async function loadSampleSheet() {
-//   await sheetClientLoaded.promise
-//   return gapi.client.sheets.spreadsheets.values.get({
-//     spreadsheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
-//     range: 'Class Data!A2:E',
-//   }).then(function (response) {
-//     var range = response.result;
-//     if (range.values.length > 0) {
-//       for (i = 0; i < range.values.length; i++) {
-//         var row = range.values[i];
-//         console.log(JSON.stringify(row))
-//       }
-//     }
-//   })
-// }
-
-// loadSampleSheet()
 
 function onFailure(error) {
   console.log(error);
