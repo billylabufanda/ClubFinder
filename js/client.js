@@ -200,6 +200,9 @@ class Internship {
     this.numberOfStudents = entry.gsx$numberofstudents.$t
     this.logo = entry.gsx$logo.$t
   }
+
+  // TODO: append new card to #InternshipCards
+
   render() {
     const card = $("#InternshipCard");
     ["name", "location", "interest", "jobDescription", "contactInfo", "typeOfWork", "numberOfStudents"].forEach(ea => {
@@ -239,7 +242,7 @@ $.getJSON("https://spreadsheets.google.com/feeds/list/1KiBBwtRUjufhhD5FOwC0b37as
   try {
     const internships = data.feed.entry.map(e => new Internship(e))
     internshipObjects.resolve(internships)
-    internships[0].render()
+    internships.map(each => each.render())
     console.log("OK, done with parsing the sheet!")
 
     const currentInternships = intersect([locations.selectedInternships(), interests.selectedInternships(), typesOfWork.selectedInternships()]);
@@ -266,12 +269,36 @@ renderFilters()
 /**
  * Save Internships to Spreadsheet
  */
-const sheetButton = $("saveToSheetButton")
+const sheetButton = $("#saveToSheetButton")
 sheetButton.on("click", sheetButtonClick)
 
-function sheetButtonClick() {
-  consolelog(internshipObjects)
+async function sheetButtonClick() {
+  console.log("This is a save test")
+  await console.log("More save testing" + internship.name)
 }
+
+
+/**
+ *GeoLocation Data
+ */
+function geoFindMe() {
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported on this browser")
+    return;
+  }
+
+  function success(position) {
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
+    console.log("Your position is: " + latitude + ", " + latitude)
+  }
+
+  function error() {
+    alert("Unable to retrieve your location");
+  }
+  navigator.geolocation.getCurrentPosition(success, error);
+}
+geoFindMe();
 
 const CLIENT_ID = '246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com';
 const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive";
