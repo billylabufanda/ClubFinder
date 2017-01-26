@@ -1,12 +1,3 @@
-// TODO: replace with (await user)
-var userData = {
-  name: "Chuck Norris",
-  profileURL: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/M101_hires_STScI-PRC2006-10a.jpg/1280px-M101_hires_STScI-PRC2006-10a.jpg",
-  email: "chucknorris@hotmail.com"
-  //     savedInternships:
-}
-const CLIENT_ID = '246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com';
-const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive";
 
 class Deferred {
   constructor() {
@@ -95,8 +86,7 @@ async function fetchSpreadsheetId() {
 }
 fetchSpreadsheetId();
 
-
-//Find and display internships from form sheet
+// Find and display internships from form sheet
 /**
  *How things need to render:
  1) The Page needs to show the first item
@@ -164,12 +154,12 @@ class FilterSet {
       const filterId = "filter-" + this.name + "-" + filterName.toLowerCase().replace(/[^a-z0-9 ]+/g, "").trim().replace(/ +/g, "-");
       $("#" + this.name + "Tab").append(
         `<label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="${filterId}">
-         <input type="checkbox" id="${filterId}" class="mdl-switch__input" checked>
-         <span class="mdl-switch__label">${filterName}</span>
-       </label>`
+           <input type="checkbox" id="${filterId}" class="mdl-switch__input" checked>
+           <span class="mdl-switch__label">${filterName}</span>
+         </label>`
       );
       const self = this
-      $(`#${filterId}`).click(function () {
+      $("#" + filterId).click(function () {
         const checked = $(this).attr("checked")
         console.log(filterId = " is now " + checked)
         self.setFilterChecked(filterName, checked)
@@ -207,8 +197,17 @@ class Internship {
     this.contactInfo = entry.gsx$contactinformation.$t
     this.typeOfWork = entry.gsx$typeofwork.$t
     this.typeOfWork.split(",").forEach(ea => typesOfWork.addInternshipToFilter(this, ea.trim()))
-    this.numberofStudents = entry.gsx$numberofstudents.$t
+    this.numberOfStudents = entry.gsx$numberofstudents.$t
     this.logo = entry.gsx$logo.$t
+  }
+  render() {
+    const card = $("#InternshipCard");
+    ["name", "location", "interest", "jobDescription", "contactInfo", "typeOfWork", "numberOfStudents"].forEach(ea => {
+      card.find(".internship-" + ea).text(this[ea])
+    });
+    if (this.logo && this.logo.length > 0) {
+      card.find(".mdl-card__title").css("background", "url('" + this.logo.replace(/'/g, '"') + "') center / cover");
+    }
   }
 }
 
@@ -233,15 +232,20 @@ function intersect(arrayOfSets) {
   return [...arrayOfSets.pop()].filter(element => arrayOfSets.every(set => set.has(element)))
 }
 
-const currentInternships = intersect([locations.selectedInternships(), interests.selectedInternships(), typesOfWork.selectedInternships()])
-
 const internshipObjects = new Deferred()
 
 //Create Internships Array from Sheet
 $.getJSON("https://spreadsheets.google.com/feeds/list/1KiBBwtRUjufhhD5FOwC0b37asXf48Ug1m8zL5WrHCBA/default/public/values?alt=json", function (data) {
   try {
-    internshipObjects.resolve(data.feed.entry.map(e => new Internship(e)))
+    const internships = data.feed.entry.map(e => new Internship(e))
+    internshipObjects.resolve(internships)
+    internships[0].render()
     console.log("OK, done with parsing the sheet!")
+
+    const currentInternships = intersect([locations.selectedInternships(), interests.selectedInternships(), typesOfWork.selectedInternships()]);
+
+    console.log(JSON.stringify(currentInternships));
+
   } catch (error) {
     alert("Couldn't load available internships. Sorry.")
     console.log(error)
@@ -269,26 +273,16 @@ function sheetButtonClick() {
   consolelog(internshipObjects)
 }
 
-
+const CLIENT_ID = '246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com';
+const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive";
 
 /**
- *When Google Sign-in succeeds
+ * When Google Sign-in succeeds
  */
 async function onSuccess(googleUser) {
-  deferredUser.resolve(googleUser.getBasicProfile());
-
-  /** Base scope **/
-
-  console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
-  const profile = googleUser.getBasicProfile();
-  console.log(JSON.stringify(googleUser))
-  console.log('Name: ' + profile.getName());
-  console.log('Image URL: ' + profile.getImageUrl());
-  console.log('Email: ' + profile.getEmail());
-  userData.name = profile.getName();
-  userData.profileURL = profile.getImageUrl();
-  userData.email = profile.getEmail();
-
+  const user = googleUser.getBasicProfile();
+  deferredUser.resolve(user);
+  console.log(JSON.stringify(user))
   gapi.auth.authorize({
     'client_id': CLIENT_ID,
     'scope': SCOPES,
@@ -300,9 +294,11 @@ function onFailure(error) {
   console.log(error);
 }
 
+// TODO: try to delete the meta tag and see if it still works
 function goGoGoogle() {
   gapi.signin2.render('google-signin-button', {
     'scope': SCOPES,
+    'client_id': CLIENT_ID,
     'width': 240,
     'height': 25,
     'longtitle': true,

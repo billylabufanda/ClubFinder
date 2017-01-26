@@ -32,30 +32,6 @@
             <div class="mdl-card__title mdl-card--border">
               <h1 class="mdl-card__title-text">What do you want?</h1>
             </div>
-            <!--<ul id="listOfFilters">-->
-            <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Animal</span>-->
-            <!--    <br>-->
-            <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Architecture</span>-->
-            <!--    <br>-->
-            <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Art</span>-->
-            <!--    <br>-->
-            <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Education</span>-->
-            <!--    <br>-->
-            <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Engineering</span>-->
-            <!--    <br>-->
-            <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Healthcare</span>-->
-            <!--    <br>-->
-            <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Law</span>-->
-            <!--    <br>-->
-            <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Science</span>-->
-            <!--    <br>-->
-            <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Social Services</span>-->
-            <!--    <br>-->
-            <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Technology</span>-->
-            <!--    <br>-->
-            <!--    <span class="glyphicon glyphicon-ok checkmarkVisual">Youth Development</span>-->
-            <!--    <br>-->
-            <!--</ul>-->
             <div id="FilterTabs" class="mdl-card__supporting-text">
               <div class="mdl-tabs mdl-js-tabs">
                 <div class="mdl-tabs__tab-bar">
@@ -73,26 +49,50 @@
             </div>
           </div>
           <!--Internship Card -->
-          <div id="InternshipCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--6-col">
-            <div class="mdl-card__title mdl-card--border">
-              <h1 id="InternshipCardHeader" class="mdl-card__title-text">Internship:</h1>
-              <div class="mdl-layout-spacer"></div>
-              <button id="AdditionalInternshipInfoButton" class="mdl-button mdl-js-button mdl-button"> View Additional Information </button>
+
+          <div id="InternshipCard" class="demo-card-wide mdl-card mdl-shadow--2dp mdl-shadow--8dp mdl-cell mdl-cell--6-col">
+            <div class="mdl-card__title">
+              <h2 class="mdl-card__title-text internship-name"></h2>
             </div>
-            <div id="internshipCardAttributesList" class="mdl-card__supporting-text">
-              <p id="InternshipName"></p>
-              <p id="InternshipInterest"></p>
-              <p id="InternshipLocation"></p>
-              <p id="InternshipLogoText">Internship Logo:</p>
-              <img id="InternshipLogoIMG" src="http://www.logologo.com/logos/generic-globe-vector-logo.jpg"> </div>
-            <div id="internshipCardAdditionalInfo" class="mdl-card__supporting-text">
-              <p id="InternshipContact">Hi</p>
-              <p id="InternshipNumberofStudents">Boop</p>
-              <p id="InternshipJobDescription">Beep</p>
+            <div class="mdl-card__supporting-text">
+              <p class="internship-jobDescription"> </p>
+              <b>Contact Info:</b>
+              <p class="internship-contactInfo"></p>
+              <b>Type of Work:</b>
+              <p class="internship-typeOfWork"></p>
+              <b>Number of students:</b>
+              <p class="internship-numberOfStudents"></p>
             </div>
+            <div class="mdl-card__actions mdl-card--border">
+              <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"> Save </a>
+              <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"> <i class="material-icons">arrow_back</i> </a>
+              <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"> <i class="material-icons">arrow_forward</i> </a>
+            </div>
+            <!--<div class="mdl-card__menu">
+              <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect"> <i class="material-icons">share</i> </button>
+            </div>-->
           </div>
-          <!-- Profile Page -->
-          <!--<div id="ProfileCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--12-col">
+
+          <div style="display:none" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--6-col">
+<div class="mdl-card__title mdl-card--border">
+  <h1 id="InternshipCardHeader" class="mdl-card__title-text">Internship:</h1>
+  <div class="mdl-layout-spacer"></div>
+  <button id="AdditionalInternshipInfoButton" class="mdl-button mdl-js-button mdl-button"> View Additional Information </button>
+</div>
+<div id="internshipCardAttributesList" class="mdl-card__supporting-text">
+  <p id="InternshipName"></p>
+  <p id="InternshipInterest"></p>
+  <p id="InternshipLocation"></p>
+  <p id="InternshipLogoText">Internship Logo:</p>
+  <img id="InternshipLogoIMG" src="http://www.logologo.com/logos/generic-globe-vector-logo.jpg"> </div>
+<div id="internshipCardAdditionalInfo" class="mdl-card__supporting-text">
+  <p id="InternshipContact">Hi</p>
+  <p id="InternshipNumberofStudents">Boop</p>
+  <p id="InternshipJobDescription">Beep</p>
+</div>
+</div>
+<!-- Profile Page -->
+<!--<div id="ProfileCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--12-col">
               <div class="mdl-card__title mdl-card--border">
                 <h1 id="ProfileCardHeader" class="mdl-card__title-text">Profile:</h1>
               </div>
@@ -104,24 +104,24 @@
                   class="mdl-card__media">
               </div>
             </div>-->
-        </div>
-        <div id="buttons" class="mdl-grid">
-          <button id="nextInternshipButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised mdl-cell mdl-cell--6-col">
+</div>
+<div id="buttons" class="mdl-grid">
+  <button id="nextInternshipButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised mdl-cell mdl-cell--6-col">
             Next Internship </button>
-          <button id="saveInternshipButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised mdl-cell mdl-cell--6-col">
+  <button id="saveInternshipButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised mdl-cell mdl-cell--6-col">
             Save Internship for Later Viewing </button>
-          <button id="saveToSheetButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised">
+  <button id="saveToSheetButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised">
             Click to Save Internships to Sheet </button>
-        </div>
-        <div id="footer"> Made By William McEachen </div>
-      </div>
-    </main>
-  </div>
-  <script src="/client.js"></script>
-  <script src="/tindernship.js"></script>
-  <script src="https://apis.google.com/js/platform.js?onload=goGoGoogle" async defer></script>
-  <script src="https://apis.google.com/js/client.js?onload=checkAuth" async defer></script>
-  <script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
+</div>
+<div id="footer"> Made By William McEachen </div>
+</div>
+</main>
+</div>
+<script src="/client.js"></script>
+<script src="/tindernship.js"></script>
+<script src="https://apis.google.com/js/platform.js?onload=goGoGoogle" async defer></script>
+<script src="https://apis.google.com/js/client.js?onload=checkAuth" async defer></script>
+<script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
 </body>
 
 </html>
