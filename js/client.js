@@ -111,23 +111,24 @@ Render the UI
  * Holds the types of a given kind of filter, like "location" or "interest" 
  */
 class FilterSet {
-  constructor(name) {
+  constructor(name, filterClickListener) {
     this.name = name;
-    this.filterNameToInternships = new Map(); // "San Jose" => [Artik, MACLA]
-    this.checkedFilterNames = new Set();
+    this.filterNameToFilter = new Map(); // "San Jose" => new Filter("San Jose")
+    this.id = name + "Filters";
+    this.filterClickListener = filterClickListener
   }
 
-  /**
-   * Add the given internship as being associated to the given filterName.
-   * For example, Nine Lives Foundation would be associated with San Mateo.
-   */
-  addInternshipToFilter(internship, filterName) {
-    if (filterName.length > 0) {
-      if (!this.filterNameToInternships.has(filterName)) {
-        this.filterNameToInternships.set(filterName, [])
-      }
-      this.filterNameToInternships.get(filterName).push(internship)
-      this.setFilterChecked(filterName, true)
+  filterNames() {
+    return [...this.filterNameToFilter.keys()].sort()
+  }
+
+  filters() {
+    return [...this.filterNameToFilter.values()]
+  }
+
+  addFilter(filterName) {
+    if (!this.filterNameToFilter.has(filterName)) {
+      this.filterNameToFilter.set(filterName, new Filter(this, filterName))
     }
   }
 
@@ -136,54 +137,55 @@ class FilterSet {
    * newCheckedValue is the current state of the filter checkbox/switch
    */
   setFilterChecked(filterName, isChecked) {
-    if (isChecked) {
-      this.checkedFilterNames.add(filterName)
-    } else {
-      this.checkedFilterNames.delete(filterName)
-    }
-  }
-
-  filterNames() {
-    return [...this.filterNameToInternships.keys()]
+    this.filterNameToFilter.get(filterName).setChecked(isChecked);
   }
 
   render() {
-    this.filterNames().sort().forEach(filterName => {
-      // "San Francisco" -> "filter-location-san-francisco"
-      const filterId = "filter-" + this.name + "-" + filterName.toLowerCase().replace(/[^a-z0-9 ]+/g, "").trim().replace(/ +/g, "-");
-      $("#" + this.name + "Filters").append(
-        `<div class="col s4">
-          <input type="checkbox" class="filled-in" id="${filterId}" checked="checked" />
-          <label for="${filterId}">${filterName}</label>
-        </div>`
-      );
-      const self = this
-      $("#" + filterId).click(function () {
-        const checked = $(this).attr("checked")
-        console.log(filterId + " is now " + checked)
-        self.setFilterChecked(filterName, checked)
-      })
+    this.filterNames().forEach(filterName => {
+      this.filterNameToFilter.get(filterName).render()
     })
   }
 
-  /**
-   * union of all internships for currently selected filters
-   */
-  selectedInternships() /* :Set<Internship> */ {
-    const selectedInternshipsSet = new Set()
-    this.checkedFilterNames.forEach(filterName => {
-      const internships = this.filterNameToInternships.get(filterName)
-      internships.forEach(internship =>
-        selectedInternshipsSet.add(internship)
-      )
-    })
-    return selectedInternshipsSet
+  selectedFilterNames() {
+    return this.filters().filter(ea => ea.getChecked()).map(ea => ea.name)
+  }
+
+  unselectedFilterNames() {
+    return this.filters().filter(ea => !ea.getChecked()).map(ea => ea.name)
   }
 }
 
-const locations = new FilterSet("locations")
-const interests = new FilterSet("interests")
-const typesOfWork = new FilterSet("typesOfWork")
+/**
+ * "San Jose" or "Engineering"
+ */
+class Filter {
+  constructor(filterSet, name) {
+    this.filterSet = filterSet
+    this.name = name
+    this.id = "filter-" + this.filterSet.name + "-" + this.name.toLowerCase().replace(/[^a-z0-9 ]+/g, "").trim().replace(/ +/g, "-");
+  }
+
+  getChecked() {
+    return $("#" + this.id).prop("checked")
+  }
+
+  setChecked(newCheckedState) {
+    $("#" + this.id).prop("checked", newCheckedState);
+  }
+
+  render() {
+    $("#" + this.filterSet.id).append(
+      `<div class="col s4">
+         <input type="checkbox" class="filled-in filter" id="${this.id}" checked="checked" />
+         <label for="${this.id}">${this.name}</label>
+       </div>`
+    );
+    const self = this
+    $("#" + this.id).click(function () {
+      self.filterSet.filterClickListener()
+    })
+  }
+}
 
 const blankImages = [
   "/images/intern1.jpg",
@@ -203,30 +205,40 @@ function randomBlankImage() {
   return blankImages[getRandomInt(0, blankImages.length)]
 }
 
+function splitAndTrim(s) {
+  return s.split(",").map(ea => ea.trim())
+}
+
+let internshipCounter = 0
 class Internship {
   constructor(entry) {
-    this.name = entry.gsx$nameofcompany.$t
-    this.location = entry.gsx$location.$t
-    this.location.split(",").forEach(ea => locations.addInternshipToFilter(this, ea.trim()))
-    this.interest = entry.gsx$fieldofinterest.$t
-    this.interest.split(",").forEach(ea => interests.addInternshipToFilter(this, ea.trim()))
-    this.jobDescription = entry.gsx$jobdescription.$t
-    this.contactInfo = entry.gsx$contactinformation.$t
-    this.typeOfWork = entry.gsx$typeofwork.$t
-    this.typeOfWork.split(",").forEach(ea => typesOfWork.addInternshipToFilter(this, ea.trim()))
-    this.numberOfStudents = entry.gsx$numberofstudents.$t
-    this.logo = entry.gsx$logo.$t
+    this.id = ++internshipCounter;
+    this.mySelector = "Internship" + this.id
+    this.name = entry.gsx$nameofcompany.$t;
+    this.locations = splitAndTrim(entry.gsx$location.$t)
+    this.interests = splitAndTrim(entry.gsx$fieldofinterest.$t)
+    this.jobDescription = entry.gsx$jobdescription.$t;
+    this.contactInfo = entry.gsx$contactinformation.$t;
+    this.typeOfWork = entry.gsx$typeofwork.$t;
+    this.numberOfStudents = entry.gsx$numberofstudents.$t;
+    this.logo = entry.gsx$logo.$t;
   }
 
-  // TODO: append new card to #InternshipCards
-
   img() {
-    return (this.logo && this.logo.length > 0) ? this.logo : randomBlankImage()
+    return (this.logo && this.logo.length > 0) ? this.logo : randomBlankImage();
+  }
+
+  show() {
+    $("#" + this.mySelector).show();
+  }
+
+  hide() {
+    $("#" + this.mySelector).hide();
   }
 
   render() {
     $("#InternshipCards").append(
-      `<div class="col s12 m6 l4">
+      `<div class="col s12 m6 l4" id="${this.mySelector}">
           <div class="card">
             <div class="card-image">
               <img src="${this.img()}">
@@ -236,7 +248,8 @@ class Internship {
             <div class="card-content">
               <ul class="xcollection">
                 <li class="collection-item"><i class="material-icons">info</i> ${this.jobDescription}</li>
-                <li class="collection-item"><i class="material-icons">location_on</i> ${this.location}</li>
+                <li class="collection-item"><i class="material-icons">favorite</i> ${this.interests.join(", ")}</li>
+                <li class="collection-item"><i class="material-icons">location_on</i> ${this.locations.join(", ")}</li>
                 <li class="collection-item"><i class="material-icons">contact_phone</i> ${this.contactInfo}</li>
                 <li class="collection-item"><i class="material-icons">work</i> ${this.typeOfWork}</li>
                 <li class="collection-item"><i class="material-icons">people</i> ${this.numberOfStudents}</li>
@@ -268,34 +281,51 @@ function intersect(arrayOfSets) {
   return [...arrayOfSets.pop()].filter(element => arrayOfSets.every(set => set.has(element)))
 }
 
-const internshipObjects = new Deferred()
+function hasAnyOf(needles, haystack) {
+  return needles.findIndex(needle => haystack.includes(needle)) !== -1
+}
 
-//Create Internships Array from Sheet
+/**
+ * parses the internships and sets up the filtersets
+ */
+class Internships {
+  constructor(dataFeedEntry) {
+    this.internships = dataFeedEntry.map(e => new Internship(e))
+    this.locations = new FilterSet("locations", () => this.onFilterChange())
+    this.interests = new FilterSet("interests", () => this.onFilterChange())
+    this.internships.forEach(internship => {
+      internship.locations.forEach(location => this.locations.addFilter(location))
+      internship.interests.forEach(interest => this.interests.addFilter(interest))
+    })
+    this.locations.render();
+    this.interests.render();
+    $('.collapsible').collapsible();
+    this.internships.map(each => each.render());
+  }
+
+  onFilterChange() {
+    const selectedLocations = this.locations.selectedFilterNames()
+    const selectedInterests = this.interests.selectedFilterNames()
+    const toShow = this.internships.filter(internship =>
+      hasAnyOf(internship.locations, selectedLocations) &&
+      hasAnyOf(internship.interests, selectedInterests)
+    )
+    toShow.forEach(ea => ea.show());
+    const toHide = this.internships.filter(internship => !toShow.includes(internship));
+    toHide.forEach(internship => internship.hide());
+
+  }
+}
+
+// Create Internships Array from Sheet
 $.getJSON("https://spreadsheets.google.com/feeds/list/1KiBBwtRUjufhhD5FOwC0b37asXf48Ug1m8zL5WrHCBA/default/public/values?alt=json", function (data) {
   try {
-    const internships = data.feed.entry.map(e => new Internship(e))
-    internshipObjects.resolve(internships)
-    internships.map(each => each.render())
-    console.log("OK, done with parsing the sheet!")
-
-    const currentInternships = intersect([locations.selectedInternships(), interests.selectedInternships(), typesOfWork.selectedInternships()]);
-
-    console.log(JSON.stringify(currentInternships));
-
+    new Internships(data.feed.entry)
   } catch (error) {
     alert("Couldn't load available internships. Sorry.")
     console.log(error)
   }
 });
-
-async function renderFilters() {
-  // Waiting for internshipObjects ensures filter sets are filled
-  await internshipObjects.promise;
-  console.log("rendering filters!")
-  locations.render();
-  interests.render();
-  typesOfWork.render();
-}
 
 /**
  * Save Internships to Spreadsheet
@@ -308,9 +338,8 @@ async function sheetButtonClick() {
   await console.log("More save testing" + internship.name)
 }
 
-
 /**
- *GeoLocation Data
+ * GeoLocation Data
  */
 function geoFindMe() {
   if (!navigator.geolocation) {
@@ -364,8 +393,6 @@ function goGoGoogle() {
 
 $(document).ready(function () {
   $(".button-collapse").sideNav();
-  $('.collapsible').collapsible();
   geoFindMe();
-  renderFilters()
 });
 
