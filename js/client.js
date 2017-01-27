@@ -1,4 +1,3 @@
-
 class Deferred {
   constructor() {
     this._fulfilled = false;
@@ -152,16 +151,16 @@ class FilterSet {
     this.filterNames().sort().forEach(filterName => {
       // "San Francisco" -> "filter-location-san-francisco"
       const filterId = "filter-" + this.name + "-" + filterName.toLowerCase().replace(/[^a-z0-9 ]+/g, "").trim().replace(/ +/g, "-");
-      $("#" + this.name + "Tab").append(
-        `<label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="${filterId}">
-           <input type="checkbox" id="${filterId}" class="mdl-switch__input" checked>
-           <span class="mdl-switch__label">${filterName}</span>
-         </label>`
+      $("#" + this.name + "Filters").append(
+        `<div class="col s4">
+          <input type="checkbox" class="filled-in" id="${filterId}" checked="checked" />
+          <label for="${filterId}">${filterName}</label>
+        </div>`
       );
       const self = this
       $("#" + filterId).click(function () {
         const checked = $(this).attr("checked")
-        console.log(filterId = " is now " + checked)
+        console.log(filterId + " is now " + checked)
         self.setFilterChecked(filterName, checked)
       })
     })
@@ -186,6 +185,24 @@ const locations = new FilterSet("locations")
 const interests = new FilterSet("interests")
 const typesOfWork = new FilterSet("typesOfWork")
 
+const blankImages = [
+  "/images/intern1.jpg",
+  "/images/intern2.jpg",
+  "/images/intern3.jpg",
+  "/images/intern4.jpg",
+  "/images/intern5.jpg"
+]
+
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function randomBlankImage() {
+  return blankImages[getRandomInt(0, blankImages.length)]
+}
+
 class Internship {
   constructor(entry) {
     this.name = entry.gsx$nameofcompany.$t
@@ -203,14 +220,30 @@ class Internship {
 
   // TODO: append new card to #InternshipCards
 
+  img() {
+    return (this.logo && this.logo.length > 0) ? this.logo : randomBlankImage()
+  }
+
   render() {
-    const card = $("#InternshipCard");
-    ["name", "location", "interest", "jobDescription", "contactInfo", "typeOfWork", "numberOfStudents"].forEach(ea => {
-      card.find(".internship-" + ea).text(this[ea])
-    });
-    if (this.logo && this.logo.length > 0) {
-      card.find(".mdl-card__title").css("background", "url('" + this.logo.replace(/'/g, '"') + "') center / cover");
-    }
+    $("#InternshipCards").append(
+      `<div class="col s12 m6 l4">
+          <div class="card">
+            <div class="card-image">
+              <img src="${this.img()}">
+              <span class="card-title">${this.name}</span>
+              <a class="btn-floating halfway-fab waves-effect waves-light red" title="Save this internship"><i class="material-icons">star_border</i></a>
+            </div>
+            <div class="card-content">
+              <ul class="xcollection">
+                <li class="collection-item"><i class="material-icons">info</i> ${this.jobDescription}</li>
+                <li class="collection-item"><i class="material-icons">location_on</i> ${this.location}</li>
+                <li class="collection-item"><i class="material-icons">contact_phone</i> ${this.contactInfo}</li>
+                <li class="collection-item"><i class="material-icons">work</i> ${this.typeOfWork}</li>
+                <li class="collection-item"><i class="material-icons">people</i> ${this.numberOfStudents}</li>
+              </ul>
+            </div>
+          </div>
+        </div>`)
   }
 }
 
@@ -264,8 +297,6 @@ async function renderFilters() {
   typesOfWork.render();
 }
 
-renderFilters()
-
 /**
  * Save Internships to Spreadsheet
  */
@@ -298,7 +329,6 @@ function geoFindMe() {
   }
   navigator.geolocation.getCurrentPosition(success, error);
 }
-geoFindMe();
 
 const CLIENT_ID = '246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com';
 const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive";
@@ -326,11 +356,16 @@ function goGoGoogle() {
   gapi.signin2.render('google-signin-button', {
     'scope': SCOPES,
     'client_id': CLIENT_ID,
-    'width': 240,
-    'height': 25,
-    'longtitle': true,
     'theme': 'dark',
     'onsuccess': onSuccess,
     'onfailure': onFailure
   });
 }
+
+$(document).ready(function () {
+  $(".button-collapse").sideNav();
+  $('.collapsible').collapsible();
+  geoFindMe();
+  renderFilters()
+});
+

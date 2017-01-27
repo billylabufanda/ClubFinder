@@ -1,9 +1,24 @@
-.mdl-navigation__link:hover {
-  background-color: #293ea5;
-  transition: .2s;
-  text-decoration: none;
+#google-signin-button > .abcRioButton {
+  margin: .9em;
 }
 
-#InternshipCard .mdl-card__title {
-  height: 20em;
+#InternshipCards .card-title {
+  width: 100%;
+  background-color: rgba(0, 0, 0, .5);
+  font-weight: bold;
+}
+
+#InternshipCards .card-image img {
+  width: 100%;
+  height: 15em;
+}
+
+@media only screen and (min-width: 993px) {
+  .container {
+    width: 85%
+  }
+}
+
+#InternshipCards .card {
+  height: 41em;
 }

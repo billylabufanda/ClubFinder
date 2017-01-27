@@ -8,120 +8,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="google-signin-client_id" content="246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com"> </head>
 
-<body id="mainpage">
-  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-    <header class="mdl-layout__header">
-      <div class="mdl-layout__header-row">
-        <span id="WebsiteTitle" class="mdl-layout__title">Tindernship</span>
-        <div class="mdl-layout-spacer"></div>
-        <nav class="mdl-navigation">
-          <a class="mdl-navigation__link" id="google-signin-button"></a>
-          <a id="viewSavedInternships" class="mdl-navigation__link">Saved Internships</a>
-          <a id="viewProfilePage" class="mdl-navigation__link">Profile Page</a>
-        </nav>
+<body>
+  <nav class="indigo darken-1" role="navigation">
+    <div class="container">
+      <div class="brand-logo">Tindernship</div>
+      <ul class="right hide-on-small-only">
+        <li>
+          <span id="google-signin-button">Sign in</span>
+        </li>
+        <li><a href="#!">Saved Internships</a></li>
+      </ul>
+    </div>
+  </nav>
+  <div class="container">
+    <!--Internship Filters -->
+    <div class="row">
+      <div class="col s12">
+        <ul class="collapsible" data-collapsible="accordion">
+          <li>
+            <div class="collapsible-header"><i class="material-icons">location_on</i>Locations</div>
+            <div class="collapsible-body">
+              <div class="row" id="locationsFilters"></div>
+            </div>
+          </li>
+          <li>
+            <div class="collapsible-header"><i class="material-icons">favorite</i>Interests</div>
+            <div class="collapsible-body">
+              <div class="row" id="interestsFilters"></div>
+            </div>
+          </li>
+          <li>
+            <div class="collapsible-header"><i class="material-icons">work</i>Work Type</div>
+            <div class="collapsible-body">
+              <div class="row" id="typesOfWorkFilters"></div>
+            </div>
+          </li>
+        </ul>
       </div>
-    </header>
-    <main class="mdl-layout__content">
-      <div class="page-content">
-        <div id="InternshipCardandFilters" class="mdl-grid">
-          <!--Internship Filter -->
-          <div id="FilterCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--6-col">
-            <div class="mdl-card__title mdl-card--border">
-              <h1 class="mdl-card__title-text">What do you want?</h1>
-            </div>
-            <div id="FilterTabs" class="mdl-card__supporting-text">
-              <div class="mdl-tabs mdl-js-tabs">
-                <div class="mdl-tabs__tab-bar">
-                  <a href="#locationsTab" class="mdl-tabs__tab">Location</a>
-                  <a href="#interestsTab" class="mdl-tabs__tab">Interests</a>
-                  <a href="#typesOfWorkTab" class="mdl-tabs__tab">Work Type</a>
-                </div>
-                <div class="mdl-tabs__panel is-active" id="locationsTab">
-                </div>
-                <div class="mdl-tabs__panel " id="interestsTab">
-                </div>
-                <div class="mdl-tabs__panel" id="typesOfWorkTab">
-                </div>
-              </div>
-            </div>
-          </div>
-          <!--Internship Card -->
-          <div id="InternshipCards">
-            <div id="InternshipCard" class="demo-card-wide mdl-card mdl-shadow--2dp mdl-shadow--8dp mdl-cell mdl-cell--6-col">
-              <div class="mdl-card__title">
-                <h2 class="mdl-card__title-text internship-name"></h2>
-              </div>
-              <div class="mdl-card__supporting-text">
-                <p class="internship-jobDescription"> </p>
-                <b>Contact Info:</b>
-                <p class="internship-contactInfo"></p>
-                <b>Type of Work:</b>
-                <p class="internship-typeOfWork"></p>
-                <b>Number of students:</b>
-                <p class="internship-numberOfStudents"></p>
-              </div>
-              <div class="mdl-card__actions mdl-card--border">
-                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"> Save </a>
-                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"> <i class="material-icons">arrow_back</i> </a>
-                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"> <i class="material-icons">arrow_forward</i> </a>
-              </div>
-              <!--<div class="mdl-card__menu">
-              <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect"> <i class="material-icons">share</i> </button>
-            </div>-->
-            </div>
-          </div>
-          <!--<div style="display:none" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--6-col">
-<div class="mdl-card__title mdl-card--border">
-  <h1 id="InternshipCardHeader" class="mdl-card__title-text">Internship:</h1>
-  <div class="mdl-layout-spacer"></div>
-  <button id="AdditionalInternshipInfoButton" class="mdl-button mdl-js-button mdl-button"> View Additional Information </button>
-</div>
-<div id="internshipCardAttributesList" class="mdl-card__supporting-text">
-  <p id="InternshipName"></p>
-  <p id="InternshipInterest"></p>
-  <p id="InternshipLocation"></p>
-  <p id="InternshipLogoText">Internship Logo:</p>
-  <img id="InternshipLogoIMG" src="http://www.logologo.com/logos/generic-globe-vector-logo.jpg"> </div>
-<div id="internshipCardAdditionalInfo" class="mdl-card__supporting-text">
-  <p id="InternshipContact">Hi</p>
-  <p id="InternshipNumberofStudents">Boop</p>
-  <p id="InternshipJobDescription">Beep</p>
-</div>
-</div>-->
-          <!-- Profile Page -->
-          <!--<div id="ProfileCard" class="mdl-card mdl-shadow--2dp through mdl-shadow--8dp mdl-cell mdl-cell--12-col">
-              <div class="mdl-card__title mdl-card--border">
-                <h1 id="ProfileCardHeader" class="mdl-card__title-text">Profile:</h1>
-              </div>
-              <div id="ProfileCardAttributesList" class="mdl-card__supporting-text">
-                <p id="ProfileName">Chuck Norris</p>
-                <p id="ProfileEmail">chucknorris@hotmail.com</p>
-                <p id="ProfileImageText">Profile Picture:</p>
-                <img id="ProfileImage" src="https://i.ytimg.com/vi/kxfeTcty3Do/maxresdefault.jpg" alt="Mountain View"
-                  class="mdl-card__media">
-              </div>
-            </div>-->
-        </div>
-        <div id="buttons" class="mdl-grid">
-          <button id="nextInternshipButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised mdl-cell mdl-cell--6-col">
-            Next Internship </button>
-          <button id="saveInternshipButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised mdl-cell mdl-cell--6-col">
-            Save Internship for Later Viewing </button>
-          <button id="saveToSheetButton" class="col-sm-6 mdl-button mdl-js-button mdl-button--raised">
-            Click to Save Internships to Sheet </button>
-        </div>
-        <div id="footer"> Made By William McEachen </div>
-      </div>
-    </main>
+    </div>
+    <!--Internship Cards -->
+    <div id="InternshipCards" class="row">
+    </div>
+    <div id="footer"> Made By William McEachen </div>
   </div>
+  </div>
+
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-  <script src="/client.js"></script>
-  <script src="/tindernship.js"></script>
+  <script src="/js/materialize.min.js"></script>
+  <script src="/js/client.js"></script>
   <script src="https://apis.google.com/js/platform.js?onload=goGoGoogle" async defer></script>
   <script src="https://apis.google.com/js/client.js?onload=checkAuth" async defer></script>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVE4YYgpUF8Kc0gTm_DGEd81zsP4i6P10
 &callback=initMap"></script>
-  <script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
 </body>
 
 </html>
