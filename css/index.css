@@ -1,24 +1,19 @@
 #google-signin-button > .abcRioButton {
-  margin: .9em;
-}
-
-#InternshipCards .card-title {
-  width: 100%;
-  background-color: rgba(0, 0, 0, .5);
-  font-weight: bold;
-}
-
-#InternshipCards .card-image img {
-  width: 100%;
-  height: 15em;
+  margin: 1em;
 }
 
 @media only screen and (min-width: 993px) {
   .container {
-    width: 85%
+    width: 90% !important;
   }
 }
 
-#InternshipCards .card {
-  height: 41em;
+#InternshipCards .card-reveal .material-icons {
+  vertical-align: baseline;
+  padding-right: 1em;
+}
+
+#InternshipCards .card-image img {
+  background: url(images/intern4.jpg) no-repeat center center;
+  height: 15em;
 }

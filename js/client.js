@@ -224,39 +224,47 @@ class Internship {
     this.logo = entry.gsx$logo.$t;
   }
 
-  img() {
-    return (this.logo && this.logo.length > 0) ? this.logo : randomBlankImage();
-  }
 
   show() {
-    $("#" + this.mySelector).show();
+    $("#" + this.mySelector).fadeIn();
   }
 
   hide() {
-    $("#" + this.mySelector).hide();
+    $("#" + this.mySelector).fadeOut();
+  }
+
+  bgStyle() {
+    return (this.logo && this.logo.length > 0) ? `background-image:url(${this.logo})` : "";
   }
 
   render() {
     $("#InternshipCards").append(
-      `<div class="col s12 m6 l4" id="${this.mySelector}">
-          <div class="card">
-            <div class="card-image">
-              <img src="${this.img()}">
-              <span class="card-title">${this.name}</span>
-              <a class="btn-floating halfway-fab waves-effect waves-light red" title="Save this internship"><i class="material-icons">star_border</i></a>
-            </div>
-            <div class="card-content">
-              <ul class="xcollection">
-                <li class="collection-item"><i class="material-icons">info</i> ${this.jobDescription}</li>
-                <li class="collection-item"><i class="material-icons">favorite</i> ${this.interests.join(", ")}</li>
-                <li class="collection-item"><i class="material-icons">location_on</i> ${this.locations.join(", ")}</li>
-                <li class="collection-item"><i class="material-icons">contact_phone</i> ${this.contactInfo}</li>
-                <li class="collection-item"><i class="material-icons">work</i> ${this.typeOfWork}</li>
-                <li class="collection-item"><i class="material-icons">people</i> ${this.numberOfStudents}</li>
-              </ul>
-            </div>
+      `<div class="col s12 m6 l6" id="${this.mySelector}">
+        <div class="card sticky-action z-depth-1">
+          <div class="card-image waves-effect waves-block waves-light"> 
+            <img class="activator" style="${this.bgStyle()}" />
           </div>
-        </div>`)
+          <div class="card-content">
+            <span class="card-title activator">
+              <i class="material-icons right">more_vert</i>
+              ${this.name}
+            </span>
+          </div>
+          <div class="card-reveal">
+            <i class="material-icons right">close</i>
+            <span class="card-title">${this.name}</span>
+            <p>${this.jobDescription}</p>
+            <p><i class="tiny material-icons">location_on</i> ${this.locations.join(", ")}</p>
+            <p><i class="tiny material-icons">contact_phone</i> ${this.contactInfo}</p>
+            <p><i class="tiny material-icons">favorite</i> ${this.interests.join(", ")}</p>
+            <p><i class="tiny material-icons">work</i> ${this.typeOfWork}</p>
+            <p><i class="tiny material-icons">people</i> ${this.numberOfStudents}</p>
+          </div>
+          <div class="card-action">
+            <a class="waves-effect waves-light" title="Save this internship">Save</a>
+          </div>
+        </div>
+      </div>`)
   }
 }
 
@@ -301,6 +309,7 @@ class Internships {
     this.interests.render();
     $('.collapsible').collapsible();
     this.internships.map(each => each.render());
+    this.onFilterChange();
   }
 
   onFilterChange() {
@@ -312,7 +321,7 @@ class Internships {
     )
     toShow.forEach(ea => ea.show());
     const toHide = this.internships.filter(internship => !toShow.includes(internship));
-    toHide.forEach(internship => internship.hide());
+    toHide.forEach(ea => ea.hide());
 
   }
 }
