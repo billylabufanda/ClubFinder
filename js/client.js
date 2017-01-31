@@ -55,10 +55,10 @@ async function fetchSpreadsheetId() {
 
   const files = await deferredFiles.promise
 
-  if (files && files.length == 1) {
-    deferredSpreadsheetId.resolve(files[0].id)
-    console.log("Found prior Sheet " + files[0].id);
-    return
+  if (files && files.length == 1 && files[0].id) {
+    const spreadsheetId = files[0].id;
+    console.log("Found prior Sheet " + spreadsheetId);
+    deferredSpreadsheetId.resolve(spreadsheetId)
   }
 
   // Darn, we have to create it:
@@ -261,18 +261,17 @@ class Internship {
             <p><i class="tiny material-icons">people</i> ${this.numberOfStudents}</p>
           </div>
           <div class="card-action">
-            <a class="waves-effect waves-light" title="Save this internship" id="${this.name}">Save</a>
+            <a class="waves-effect waves-light" title="Save this internship" id="${this.mySelector}-save">Save</a>
           </div>
         </div>
-      </div>`)
+      </div>`);
+    $("#" + this.mySelector + "-save").click(() => this.saveClicked());
   }
 
-  save() {
-    $("#" + this.name).click(function () {
-      alert("hi")
-    })
-  }
+  saveClicked() {
+    alert("saveClicked on " + JSON.stringify(this))
 
+  }
 }
 
 
