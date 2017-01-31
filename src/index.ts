@@ -1,93 +1,121 @@
-class Deferred {
+class Deferred<T> {
+  readonly promise: Promise<T>
+  private _resolve: (value?: T) => void
+  private _reject: (reason?: any) => void
+  private _fulfilled: boolean = false
+
   constructor() {
-    this._fulfilled = false;
-    this.promise = new Promise((resolve, reject) => {
-      this._resolve = resolve;
-      this._reject = reject;
-    });
+    this.promise = new Promise<T>((resolve, reject) => {
+      this._resolve = resolve
+      this._reject = reject
+    })
   }
-  get fulfilled() {
-    return this._fulfilled;
+
+  get fulfilled(): boolean {
+    return this._fulfilled
   }
-  resolve(value) {
-    this._fulfilled = true;
-    this._resolve(value);
+
+  resolve(value?: T): void {
+    this._fulfilled = true
+    this._resolve(value)
   }
-  reject(reason) {
-    this._fulfilled = true;
-    this._reject(reason);
+
+  reject(reason?: any): void {
+    this._fulfilled = true
+    this._reject(reason)
   }
 }
 
-const deferredUser = new Deferred();
-const user = deferredUser.promise;
-const driveClientLoaded = new Deferred();
-const sheetClientLoaded = new Deferred();
+interface User {
+  getName(): string
+  getEmail(): string
+}
+
+const deferredUser = new Deferred<User>()
+const user = deferredUser.promise
+const driveClientLoaded = new Deferred<void>()
+const sheetClientLoaded = new Deferred<void>()
+
+declare const gapi: any
+declare const $: any
 
 /**
  * Load Sheets API client library.
  */
 function loadClients() {
   sheetClientLoaded.resolve(
-    gapi.client.load('https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest')
-  );
+    gapi.client.load("https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest")
+  )
   driveClientLoaded.resolve(
-    gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest')
-  );
+    gapi.client.load("https://www.googleapis.com/discovery/v1/apis/drive/v3/rest")
+  )
 }
 
 /**
  * Find or Create the Spreadsheet
  */
-const deferredSpreadsheetId = new Deferred();
-const spreadsheetId = deferredSpreadsheetId.promise
-
-async function fetchSpreadsheetId() {
-  await driveClientLoaded.promise;
-  await sheetClientLoaded.promise;
-
-  // Does the sheet exist already?
-  const deferredFiles = new Deferred()
-  gapi.client.drive.files.list({
-    pageSize: 1,
-    q: `properties has { key='InternshipsFor' and value='${(await user).getEmail()}'}`,
-  }).execute(result => deferredFiles.resolve(result.files));
-
-  const files = await deferredFiles.promise
-
-  if (files && files.length == 1 && files[0].id) {
-    const spreadsheetId = files[0].id;
-    console.log("Found prior Sheet " + spreadsheetId);
-    deferredSpreadsheetId.resolve(spreadsheetId)
+class StudentSheet {
+  private readonly sheetIdPromise
+  constructor() {
+    this.sheetIdPromise = this.getSpreadsheetId()
+  }
+  /**
+   * @returns the prior saved state of the given filter
+   */
+  getFilterState(filterId: string): boolean {
+    return true
   }
 
-  // Darn, we have to create it:
+  setFilterState(filterId: string, checked: boolean) {
+    return true
+  }
 
-  const response = await gapi.client.sheets.spreadsheets.create({
-    "properties": {
-      "title": `Tindernship Profile for ${(await user).getName()}`
+  private async getSpreadsheetId(): Promise<string> {
+    await driveClientLoaded.promise
+    await sheetClientLoaded.promise
+
+    // Does the sheet exist already?
+    const deferredFiles = new Deferred<any[]>()
+    gapi.client.drive.files.list({
+      pageSize: 1,
+      q: `properties has { key='InternshipsFor' and value='${(await user).getEmail()}'}`
+    }).execute(result => deferredFiles.resolve(result.files))
+
+    const files = await deferredFiles.promise
+
+    if (files && files.length === 1 && files[0].id) {
+      const spreadsheetId = files[0].id
+      console.log("Found prior Sheet " + spreadsheetId)
+      return spreadsheetId
     }
-  })
 
-  const spreadsheetId = response.result.spreadsheetId
+    // Darn, we have to create it:
 
-  // And set the metadata to find it later
+    const response = await gapi.client.sheets.spreadsheets.create({
+      "properties": {
+        "title": `Tindernship Profile for ${(await user).getName()}`
+      }
+    })
 
-  gapi.client.drive.files.update({
-    fileId: spreadsheetId,
-    properties: {
-      InternshipsFor: (await user).getEmail()
-    }
-  }).execute(result => {
-    deferredSpreadsheetId.resolve(spreadsheetId)
-    console.log("Created new sheet " + spreadsheetId);
-  })
+    const spreadsheetId = response.result.spreadsheetId
+
+    // And set the metadata to find it later
+
+    gapi.client.drive.files.update({
+      fileId: spreadsheetId,
+      properties: {
+        InternshipsFor: (await user).getEmail()
+      }
+    }).execute(result => {
+      console.log("Created new sheet " + spreadsheetId)
+      return spreadsheetId
+    })
+  }
 }
-fetchSpreadsheetId();
 
 // Find and display internships from form sheet
-/**
- *How things need to render:
+/*
+ How things need to render:
  1) The Page needs to show the first item
  2) On button click, the page needs to show the next item
  3) So run a function that displays the internship once, and then have the function increase every time button
@@ -104,17 +132,21 @@ If logged in, apply saved state
 Render the UI
  Set filters to saved state
  Render the first internship that meets current filters
-
  */
 
 /**
- * Holds the types of a given kind of filter, like "location" or "interest" 
+ * Holds the types of a given kind of filter, like "location" or "interest"
  */
 class FilterSet {
+  readonly name: string
+  readonly id: string
+  readonly filterClickListener: () => void
+  private readonly filterNameToFilter: Map<string, Filter>
+
   constructor(name, filterClickListener) {
-    this.name = name;
-    this.filterNameToFilter = new Map(); // "San Jose" => new Filter("San Jose")
-    this.id = name + "Filters";
+    this.name = name
+    this.filterNameToFilter = new Map() // "San Jose" => new Filter("San Jose")
+    this.id = name + "Filters"
     this.filterClickListener = filterClickListener
   }
 
@@ -137,7 +169,7 @@ class FilterSet {
    * newCheckedValue is the current state of the filter checkbox/switch
    */
   setFilterChecked(filterName, isChecked) {
-    this.filterNameToFilter.get(filterName).setChecked(isChecked);
+    this.filterNameToFilter.get(filterName).setChecked(isChecked)
   }
 
   render() {
@@ -159,10 +191,14 @@ class FilterSet {
  * "San Jose" or "Engineering"
  */
 class Filter {
+  readonly name: string
+  private readonly filterSet: FilterSet
+  private readonly id: string
   constructor(filterSet, name) {
     this.filterSet = filterSet
     this.name = name
-    this.id = "filter-" + this.filterSet.name + "-" + this.name.toLowerCase().replace(/[^a-z0-9 ]+/g, "").trim().replace(/ +/g, "-");
+    const safeName = this.name.toLowerCase().replace(/[^a-z0-9 ]+/g, "").trim().replace(/ +/g, "-")
+    this.id = "filter-" + this.filterSet.name + "-" + safeName
   }
 
   getChecked() {
@@ -170,7 +206,7 @@ class Filter {
   }
 
   setChecked(newCheckedState) {
-    $("#" + this.id).prop("checked", newCheckedState);
+    $("#" + this.id).prop("checked", newCheckedState)
   }
 
   render() {
@@ -179,7 +215,7 @@ class Filter {
          <input type="checkbox" class="filled-in filter" id="${this.id}" checked="checked" />
          <label for="${this.id}">${this.name}</label>
        </div>`
-    );
+    )
     const self = this
     $("#" + this.id).click(function () {
       self.filterSet.filterClickListener()
@@ -196,9 +232,9 @@ const blankImages = [
 ]
 
 function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min;
+  min = Math.ceil(min)
+  max = Math.floor(max)
+  return Math.floor(Math.random() * (max - min)) + min
 }
 
 function randomBlankImage() {
@@ -211,30 +247,40 @@ function splitAndTrim(s) {
 
 let internshipCounter = 0
 class Internship {
+  readonly locations: Array<string>
+  readonly interests: Array<string>
+  readonly name: string
+  readonly jobDescription: string
+  readonly contactInfo: string
+  readonly typeOfWork: string
+  readonly numberOfStudents: string
+  readonly logo: string
+  private readonly id: number
+  private readonly mySelector: string
+
   constructor(entry) {
-    this.id = ++internshipCounter;
+    this.id = ++internshipCounter
     this.mySelector = "Internship" + this.id
-    this.name = entry.gsx$nameofcompany.$t;
+    this.name = entry.gsx$nameofcompany.$t
     this.locations = splitAndTrim(entry.gsx$location.$t)
     this.interests = splitAndTrim(entry.gsx$fieldofinterest.$t)
-    this.jobDescription = entry.gsx$jobdescription.$t;
-    this.contactInfo = entry.gsx$contactinformation.$t;
-    this.typeOfWork = entry.gsx$typeofwork.$t;
-    this.numberOfStudents = entry.gsx$numberofstudents.$t;
-    this.logo = entry.gsx$logo.$t;
+    this.jobDescription = entry.gsx$jobdescription.$t
+    this.contactInfo = entry.gsx$contactinformation.$t
+    this.typeOfWork = entry.gsx$typeofwork.$t
+    this.numberOfStudents = entry.gsx$numberofstudents.$t
+    this.logo = entry.gsx$logo.$t
   }
 
-
   show() {
-    $("#" + this.mySelector).fadeIn();
+    $("#" + this.mySelector).fadeIn()
   }
 
   hide() {
-    $("#" + this.mySelector).fadeOut();
+    $("#" + this.mySelector).fadeOut()
   }
 
   bgStyle() {
-    return (this.logo && this.logo.length > 0) ? `background-image:url(${this.logo})` : "";
+    return (this.logo && this.logo.length > 0) ? `background-image:url(${this.logo})` : ""
   }
 
   render() {
@@ -264,8 +310,8 @@ class Internship {
             <a class="waves-effect waves-light" title="Save this internship" id="${this.mySelector}-save">Save</a>
           </div>
         </div>
-      </div>`);
-    $("#" + this.mySelector + "-save").click(() => this.saveClicked());
+      </div>`)
+    $("#" + this.mySelector + "-save").click(() => this.saveClicked())
   }
 
   saveClicked() {
@@ -274,20 +320,19 @@ class Internship {
   }
 }
 
-
 /**
  * Intersect an array of sets
  */
-function intersect(arrayOfSets) {
-  const intersection = new Set()
-  const lastSet = arrayOfSets.pop()
-  for (element of lastSet) {
-    if (arrayOfSets.every(set => set.has(element))) {
-      intersection.add(element)
-    }
-  }
-  return intersection
-}
+// function intersect(arrayOfSets:Array<) {
+//   const intersection = new Set()
+//   const lastSet = arrayOfSets.pop()
+//   for (element of lastSet) {
+//     if (arrayOfSets.every(set => set.has(element))) {
+//       intersection.add(element)
+//     }
+//   }
+//   return intersection
+// }
 
 /**
  * @return an array holding only elements found in every element in `arrayOfSets`
@@ -304,6 +349,9 @@ function hasAnyOf(needles, haystack) {
  * parses the internships and sets up the filtersets
  */
 class Internships {
+  private readonly internships: Array<Internship>
+  private readonly locations: FilterSet
+  private readonly interests: FilterSet
   constructor(dataFeedEntry) {
     this.internships = dataFeedEntry.map(e => new Internship(e))
     this.locations = new FilterSet("locations", () => this.onFilterChange())
@@ -312,11 +360,11 @@ class Internships {
       internship.locations.forEach(location => this.locations.addFilter(location))
       internship.interests.forEach(interest => this.interests.addFilter(interest))
     })
-    this.locations.render();
-    this.interests.render();
-    $('.collapsible').collapsible();
-    this.internships.map(each => each.render());
-    this.onFilterChange();
+    this.locations.render()
+    this.interests.render()
+    $(".collapsible").collapsible()
+    this.internships.map(each => each.render())
+    this.onFilterChange()
   }
 
   onFilterChange() {
@@ -326,14 +374,15 @@ class Internships {
       hasAnyOf(internship.locations, selectedLocations) &&
       hasAnyOf(internship.interests, selectedInterests)
     )
-    toShow.forEach(ea => ea.show());
-    const toHide = this.internships.filter(internship => !toShow.includes(internship));
-    toHide.forEach(ea => ea.hide());
+    toShow.forEach(ea => ea.show())
+    const toHide = this.internships.filter(internship => !toShow.includes(internship))
+    toHide.forEach(ea => ea.hide())
 
   }
 }
 
 // Create Internships Array from Sheet
+// tslint:disable-next-line:max-line-length
 $.getJSON("https://spreadsheets.google.com/feeds/list/1KiBBwtRUjufhhD5FOwC0b37asXf48Ug1m8zL5WrHCBA/default/public/values?alt=json", function (data) {
   try {
     new Internships(data.feed.entry)
@@ -341,18 +390,7 @@ $.getJSON("https://spreadsheets.google.com/feeds/list/1KiBBwtRUjufhhD5FOwC0b37as
     alert("Couldn't load available internships. Sorry.")
     console.log(error)
   }
-});
-
-/**
- * Save Internships to Spreadsheet
- */
-const sheetButton = $("#saveToSheetButton")
-sheetButton.on("click", sheetButtonClick)
-
-async function sheetButtonClick() {
-  console.log("This is a save test")
-  await console.log("More save testing" + internship.name)
-}
+})
 
 /**
  * GeoLocation Data
@@ -360,58 +398,61 @@ async function sheetButtonClick() {
 function geoFindMe() {
   if (!navigator.geolocation) {
     alert("Geolocation is not supported on this browser")
-    return;
+    return
   }
 
   function success(position) {
-    const latitude = position.coords.latitude;
-    const longitude = position.coords.longitude;
+    const latitude = position.coords.latitude
+    const longitude = position.coords.longitude
     console.log("Your position is: " + latitude + ", " + latitude)
   }
 
   function error() {
-    alert("Unable to retrieve your location");
+    alert("Unable to retrieve your location")
   }
-  navigator.geolocation.getCurrentPosition(success, error);
+  navigator.geolocation.getCurrentPosition(success, error)
 }
 
 function geoLocationFilter() {
-
+  return true
 }
 
-const CLIENT_ID = '246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com';
-const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive";
+const CLIENT_ID = "246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com"
+const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
 
 /**
  * When Google Sign-in succeeds
  */
 async function onSuccess(googleUser) {
-  const user = googleUser.getBasicProfile();
-  deferredUser.resolve(user);
+  const user = googleUser.getBasicProfile()
+  deferredUser.resolve(user)
   console.log(JSON.stringify(user))
-  gapi.auth.authorize({
-    'client_id': CLIENT_ID,
-    'scope': SCOPES,
-    'immediate': true
-  }, loadClients);
+  gapi.auth.authorize(
+    {
+      "client_id": CLIENT_ID,
+      "scope": SCOPES,
+      "immediate": true
+    },
+    loadClients
+  )
 }
 
 function onFailure(error) {
-  console.log(error);
+  console.log(error)
 }
 
 // TODO: try to delete the meta tag and see if it still works
 function goGoGoogle() {
-  gapi.signin2.render('google-signin-button', {
-    'scope': SCOPES,
-    'client_id': CLIENT_ID,
-    'theme': 'dark',
-    'onsuccess': onSuccess,
-    'onfailure': onFailure
-  });
+  gapi.signin2.render("google-signin-button", {
+    "scope": SCOPES,
+    "client_id": CLIENT_ID,
+    "theme": "dark",
+    "onsuccess": onSuccess,
+    "onfailure": onFailure
+  })
 }
 
 $(document).ready(function () {
-  $(".button-collapse").sideNav();
-  geoFindMe();
-});
+  $(".button-collapse").sideNav()
+  geoFindMe()
+})

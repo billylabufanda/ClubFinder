@@ -4,7 +4,11 @@
   "description": "TODO",
   "main": "index.js",
   "scripts": {
-    "start": "serve . -p 8000"
+    "lint": "tslint --fix src/*.ts",
+    "compile": "tsc",
+    "watch": "tsc -w",
+    "serve": "serve . -p 8000",
+    "start": "run-p watch serve"
   },
   "repository": {
     "type": "git",
@@ -17,6 +21,10 @@
   },
   "homepage": "https://github.com/billylabufanda/billylabufanda.github.io#readme",
   "devDependencies": {
+    "npm-run-all": "^4.0.0",
+    "tslint": "^4.3.1",
+    "tslint-config-standard": "^2.0.0",
+    "tslint-eslint-rules": "^3.2.3",
     "serve": "^2.4.3"
   }
 }
