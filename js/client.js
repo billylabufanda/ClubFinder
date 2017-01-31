@@ -261,12 +261,20 @@ class Internship {
             <p><i class="tiny material-icons">people</i> ${this.numberOfStudents}</p>
           </div>
           <div class="card-action">
-            <a class="waves-effect waves-light" title="Save this internship">Save</a>
+            <a class="waves-effect waves-light" title="Save this internship" id="${this.name}">Save</a>
           </div>
         </div>
       </div>`)
   }
+
+  save() {
+    $("#" + this.name).click(function () {
+      alert("hi")
+    })
+  }
+
 }
+
 
 /**
  * Intersect an array of sets
@@ -368,6 +376,10 @@ function geoFindMe() {
   navigator.geolocation.getCurrentPosition(success, error);
 }
 
+function geoLocationFilter() {
+
+}
+
 const CLIENT_ID = '246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com';
 const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive";
 
@@ -404,4 +416,3 @@ $(document).ready(function () {
   $(".button-collapse").sideNav();
   geoFindMe();
 });
-
