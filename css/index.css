@@ -39,12 +39,16 @@
 }
 
 #InternshipCards .card .card-action a:not(.btn):not(.btn-large):not(.btn-large):not(.btn-floating) {
-    color: #304ffe;
-    margin-right: 18px;
-    transition: color .3s ease;
-    text-transform: uppercase;
+  color: #304ffe;
+  margin-right: 18px;
+  transition: color .3s ease;
+  text-transform: uppercase;
 }
 
 #InternshipCards .card .card-action a:not(.btn):not(.btn-large):not(.btn-large):not(.btn-floating):hover {
-    color: #536dfe
+  color: #536dfe
+}
+
+.goog {
+  background-color: white
 }

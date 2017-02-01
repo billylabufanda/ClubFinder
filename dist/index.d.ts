@@ -129,6 +129,6 @@ declare const SCOPES = "email profile https://www.googleapis.com/auth/spreadshee
 /**
  * When Google Sign-in succeeds
  */
-declare function onSuccess(googleUser: any): Promise<void>;
-declare function onFailure(error: any): void;
-declare function goGoGoogle(): void;
+declare function checkAuth(): void;
+declare function handleAuthResult(authResult: any): Promise<void>;
+declare function handleAuthClick(event: any): boolean;

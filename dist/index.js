@@ -416,33 +416,76 @@ const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets https
 /**
  * When Google Sign-in succeeds
  */
-function onSuccess(googleUser) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const user = googleUser.getBasicProfile();
-        deferredUser.resolve(user);
-        console.log(JSON.stringify(user));
-        gapi.auth.authorize({
-            "client_id": CLIENT_ID,
-            "scope": SCOPES,
-            "immediate": true
-        }, loadClients);
-    });
-}
-function onFailure(error) {
-    console.log(error);
-}
-// TODO: try to delete the meta tag and see if it still works
-function goGoGoogle() {
-    gapi.signin2.render("google-signin-button", {
-        "scope": SCOPES,
+// async function onSuccess(googleUser) {
+//   const user = googleUser.getBasicProfile()
+//   console.log("Got " + JSON.stringify({ user }))
+//   // location.reload(true)
+// }
+// function onFailure(error) {
+//   console.log("oh snap, we're not signed in")
+//   console.log(error)
+// }
+// // TODO: try to delete the meta tag and see if it still works
+// function goGoGoogle() {
+//   gapi.signin2.render("google-signin-button", {
+//     "scope": SCOPES,
+//     "client_id": CLIENT_ID,
+//     "theme": "dark",
+//     "onsuccess": onSuccess,
+//     "onfailure": onFailure
+//   })
+// }
+// async function checkAuth() {
+//   await gapi.load("auth2")
+//   const auth2 = await gapi.auth2.init({
+//     "client_id": CLIENT_ID,
+//     "scope": SCOPES
+//   })
+//   if (auth2.isSignedIn.get()) {
+//     await auth2.signIn()
+//     const googUser = auth2.currentUser.get()
+//     console.log("YAY user is " + JSON.stringify(googUser))
+//     deferredUser.resolve(googUser)
+//     loadClients()
+//   } else {
+//     console.log("BOO user is not signed in yet")
+//     deferredUser.resolve(undefined)
+//   }
+// }
+function checkAuth() {
+    gapi.auth.authorize({
         "client_id": CLIENT_ID,
-        "theme": "dark",
-        "onsuccess": onSuccess,
-        "onfailure": onFailure
+        "scope": SCOPES,
+        "immediate": true
+    }, handleAuthResult);
+}
+function handleAuthResult(authResult) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log("didthebuttongetclicked");
+        if (authResult && !authResult.error) {
+            $("#sign-in-button").text("Signed In To Google");
+            // load client library.
+            // const googUser = auth2.currentUser.get()
+            console.log("YAY user is " + JSON.stringify(authResult));
+            deferredUser.resolve(googUser);
+            loadClients();
+        }
     });
+}
+{
+    console.log("BOO no user");
+    deferredUser.resolve(undefined);
+}
+function handleAuthClick(event) {
+    gapi.auth.authorize({
+        "client_id": CLIENT_ID,
+        "scope": SCOPES,
+        immediate: false
+    }, handleAuthResult);
+    return false;
 }
 $(document).ready(function () {
     $(".button-collapse").sideNav();
-    geoFindMe();
+    // geoFindMe()
 });
 //# sourceMappingURL=index.js.map
