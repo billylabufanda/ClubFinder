@@ -71,11 +71,14 @@ declare class Internship {
     readonly logo: string;
     private readonly id;
     private readonly mySelector;
+    private saved;
     constructor(entry: any);
     show(): void;
     hide(): void;
     bgStyle(): string;
     render(): void;
+    setSaved(newSavedState: boolean): void;
+    renderSaveButton(): void;
     saveClicked(): void;
 }
 /**
@@ -90,11 +93,11 @@ declare function hasAnyOf<T>(needles: T[], haystack: T[]): boolean;
  * parses the internships and sets up the filtersets
  */
 declare class Internships {
-    private readonly internships;
-    private readonly locations;
-    private readonly interests;
+    readonly internships: Internship[];
+    readonly locations: FilterSet;
+    readonly interests: FilterSet;
     constructor(dataFeedEntry: any);
-    findByNameAndLocation(name: string, location: string): Internship;
+    findByNameAndLocation(name: string, location: string): Internship | undefined;
     onFilterChange(): void;
 }
 declare const deferredInternships: Deferred<Internships>;
@@ -103,14 +106,12 @@ declare const deferredInternships: Deferred<Internships>;
  */
 declare class StudentSheet {
     private readonly sheetId;
-    private readonly internships;
     private readonly savedFilters;
     constructor();
     /**
      * @returns the prior saved state of the given filter
      */
     getFilterState(filterId: string): Promise<boolean>;
-    isInternshipSaved(internship: Internship): Promise<boolean>;
     setFilterState(filterId: string, checked: boolean): Promise<void>;
     private getSpreadsheetId();
     private readFiltersSheet();

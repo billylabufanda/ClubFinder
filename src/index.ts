@@ -195,6 +195,7 @@ class Internship {
   readonly logo: string
   private readonly id: number
   private readonly mySelector: string
+  private saved: boolean = false
 
   constructor(entry) {
     this.id = ++internshipCounter
@@ -221,6 +222,9 @@ class Internship {
     return (this.logo && this.logo.length > 0) ? `background-image:url(${this.logo})` : ""
   }
 
+  // TODO later? Add to the card-image div:
+  // <i class="material-icons ${this.mySelector}-save" title="Unsaved">star_border</i>
+
   render() {
     $("#InternshipCards").append(
       `<div class="col s12 m6 l6" id="${this.mySelector}">
@@ -245,16 +249,32 @@ class Internship {
             <p><i class="tiny material-icons">people</i> ${this.numberOfStudents}</p>
           </div>
           <div class="card-action">
-            <a class="waves-effect waves-light" title="Save this internship" id="${this.mySelector}-save">Save</a>
+            <div class="save progress">
+              <div class="indeterminate">
+              </div>
+            </div>
           </div>
         </div>
       </div>`)
-    $("#" + this.mySelector + "-save").click(() => this.saveClicked())
+    $("#" + this.mySelector).on("click", ".save", () => this.saveClicked())
+  }
+
+  setSaved(newSavedState: boolean) {
+    this.saved = newSavedState
+    this.renderSaveButton()
+  }
+
+  renderSaveButton() {
+    $(`#${this.mySelector} .save`).replaceWith(
+      this.saved ?
+        `<a class="save waves-effect waves-indigo btn-flat" title="Unsave this internship">Unsave</a>` :
+        `<a class="save waves-effect waves-indigo btn-flat" title="Save this internship">Save</a>`
+    )
   }
 
   saveClicked() {
-    alert("saveClicked on " + JSON.stringify(this))
-
+    this.saved = !this.saved
+    this.renderSaveButton()
   }
 }
 
@@ -287,9 +307,9 @@ function hasAnyOf<T>(needles: T[], haystack: T[]) {
  * parses the internships and sets up the filtersets
  */
 class Internships {
-  private readonly internships: Internship[]
-  private readonly locations: FilterSet
-  private readonly interests: FilterSet
+  readonly internships: Internship[]
+  readonly locations: FilterSet
+  readonly interests: FilterSet
   constructor(dataFeedEntry) {
     this.internships = dataFeedEntry.map(e => new Internship(e))
     this.locations = new FilterSet("locations", () => this.onFilterChange())
@@ -305,7 +325,7 @@ class Internships {
     this.onFilterChange()
   }
 
-  findByNameAndLocation(name: string, location: string): Internship {
+  findByNameAndLocation(name: string, location: string): Internship | undefined {
     return this.internships.find(ea =>
       ea.name === name && hasAnyOf(location.split(","), ea.locations)
     )
@@ -331,11 +351,10 @@ const deferredInternships = new Deferred<Internships>()
  */
 class StudentSheet {
   private readonly sheetId: Promise<string>
-  private readonly internships: Promise<Set<Internship>>
   private readonly savedFilters: Promise<Map<string, boolean>>
   constructor() {
     this.sheetId = this.getSpreadsheetId()
-    this.internships = this.readInternshipsSheet()
+    this.readInternshipsSheet()
     this.savedFilters = this.readFiltersSheet()
   }
 
@@ -344,10 +363,6 @@ class StudentSheet {
    */
   async getFilterState(filterId: string): Promise<boolean> {
     return (await this.savedFilters).get(filterId) || false
-  }
-
-  async isInternshipSaved(internship: Internship): Promise<boolean> {
-    return (await this.internships).has(internship)
   }
 
   async setFilterState(filterId: string, checked: boolean) {
@@ -434,19 +449,24 @@ class StudentSheet {
       range: "Filters"
     })
     return new Map<string, boolean>(
-      response.values.map(([filterId, value]) => [filterId, stringToBoolean(value)])
+      response.result.values.map(([filterId, value]) =>
+        [filterId, stringToBoolean(value)]
+      )
     )
   }
 
-  private async readInternshipsSheet(): Promise<Set<Internship>> {
+  private async readInternshipsSheet(): Promise<void> {
     const spreadsheetId = await this.sheetId
     const response = await gapi.client.sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Internships"
+      range: "Internships!A2:B200"
     })
     const internships: Internships = await deferredInternships.promise
-    return new Set<Internship>(
-      response.values.map(([name, location]) => internships.findByNameAndLocation(name, location))
+    const savedInternships = response.result.values.map(([name, location]) =>
+      internships.findByNameAndLocation(name, location)
+    )
+    internships.internships.forEach(internship =>
+      internship.setSaved(savedInternships.includes(internship))
     )
   }
 }

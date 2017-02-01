@@ -17,3 +17,34 @@
   background: url(images/intern4.jpg) no-repeat center center;
   height: 15em;
 }
+
+#InternshipCards .card-image i {
+  position: absolute;
+  display: block;
+  top: .25em;
+  right: .25em;
+  background-color: rgba(255, 255, 255, .75);
+  border-radius: 1em;
+  padding: .1em;
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+#InternshipCards .progress {
+  background-color: #536dfe
+}
+
+#InternshipCards .indeterminate {
+  background-color: #c5cae9
+}
+
+#InternshipCards .card .card-action a:not(.btn):not(.btn-large):not(.btn-large):not(.btn-floating) {
+    color: #304ffe;
+    margin-right: 18px;
+    transition: color .3s ease;
+    text-transform: uppercase;
+}
+
+#InternshipCards .card .card-action a:not(.btn):not(.btn-large):not(.btn-large):not(.btn-floating):hover {
+    color: #536dfe
+}

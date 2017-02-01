@@ -3,7 +3,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments)).next());
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
 class Deferred {
@@ -145,6 +145,7 @@ function splitAndTrim(s) {
 let internshipCounter = 0;
 class Internship {
     constructor(entry) {
+        this.saved = false;
         this.id = ++internshipCounter;
         this.mySelector = "Internship" + this.id;
         this.name = entry.gsx$nameofcompany.$t;
@@ -165,6 +166,8 @@ class Internship {
     bgStyle() {
         return (this.logo && this.logo.length > 0) ? `background-image:url(${this.logo})` : "";
     }
+    // TODO later? Add to the card-image div:
+    // <i class="material-icons ${this.mySelector}-save" title="Unsaved">star_border</i>
     render() {
         $("#InternshipCards").append(`<div class="col s12 m6 l6" id="${this.mySelector}">
         <div class="card sticky-action z-depth-1">
@@ -188,14 +191,27 @@ class Internship {
             <p><i class="tiny material-icons">people</i> ${this.numberOfStudents}</p>
           </div>
           <div class="card-action">
-            <a class="waves-effect waves-light" title="Save this internship" id="${this.mySelector}-save">Save</a>
+            <div class="save progress">
+              <div class="indeterminate">
+              </div>
+            </div>
           </div>
         </div>
       </div>`);
-        $("#" + this.mySelector + "-save").click(() => this.saveClicked());
+        $("#" + this.mySelector).on("click", ".save", () => this.saveClicked());
+    }
+    setSaved(newSavedState) {
+        this.saved = newSavedState;
+        this.renderSaveButton();
+    }
+    renderSaveButton() {
+        $(`#${this.mySelector} .save`).replaceWith(this.saved ?
+            `<a class="save waves-effect waves-indigo btn-flat" title="Unsave this internship">Unsave</a>` :
+            `<a class="save waves-effect waves-indigo btn-flat" title="Save this internship">Save</a>`);
     }
     saveClicked() {
-        alert("saveClicked on " + JSON.stringify(this));
+        this.saved = !this.saved;
+        this.renderSaveButton();
     }
 }
 /**
@@ -258,7 +274,7 @@ const deferredInternships = new Deferred();
 class StudentSheet {
     constructor() {
         this.sheetId = this.getSpreadsheetId();
-        this.internships = this.readInternshipsSheet();
+        this.readInternshipsSheet();
         this.savedFilters = this.readFiltersSheet();
     }
     /**
@@ -267,11 +283,6 @@ class StudentSheet {
     getFilterState(filterId) {
         return __awaiter(this, void 0, void 0, function* () {
             return (yield this.savedFilters).get(filterId) || false;
-        });
-    }
-    isInternshipSaved(internship) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return (yield this.internships).has(internship);
         });
     }
     setFilterState(filterId, checked) {
@@ -348,7 +359,7 @@ class StudentSheet {
                 spreadsheetId,
                 range: "Filters"
             });
-            return new Map(response.values.map(([filterId, value]) => [filterId, stringToBoolean(value)]));
+            return new Map(response.result.values.map(([filterId, value]) => [filterId, stringToBoolean(value)]));
         });
     }
     readInternshipsSheet() {
@@ -356,10 +367,11 @@ class StudentSheet {
             const spreadsheetId = yield this.sheetId;
             const response = yield gapi.client.sheets.spreadsheets.values.get({
                 spreadsheetId,
-                range: "Internships"
+                range: "Internships!A2:B200"
             });
             const internships = yield deferredInternships.promise;
-            return new Set(response.values.map(([name, location]) => internships.findByNameAndLocation(name, location)));
+            const savedInternships = response.result.values.map(([name, location]) => internships.findByNameAndLocation(name, location));
+            internships.internships.forEach(internship => internship.setSaved(savedInternships.includes(internship)));
         });
     }
 }
