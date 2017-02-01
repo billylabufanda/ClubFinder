@@ -23,20 +23,6 @@ declare const $: any;
  */
 declare function loadClients(): void;
 /**
- * Find or Create the Spreadsheet
- */
-declare class StudentSheet {
-    private readonly sheetIdPromise;
-    constructor();
-    /**
-     * @returns the prior saved state of the given filter
-     */
-    getFilterState(filterId: string): boolean;
-    setFilterState(filterId: string, checked: boolean): boolean;
-    private getSpreadsheetId();
-}
-declare const studentSheet: StudentSheet;
-/**
  * Holds the types of a given kind of filter, like "location" or "interest"
  */
 declare class FilterSet {
@@ -75,8 +61,8 @@ declare function randomBlankImage(): string;
 declare function splitAndTrim(s: any): any;
 declare let internshipCounter: number;
 declare class Internship {
-    readonly locations: Array<string>;
-    readonly interests: Array<string>;
+    readonly locations: string[];
+    readonly interests: string[];
     readonly name: string;
     readonly jobDescription: string;
     readonly contactInfo: string;
@@ -98,8 +84,8 @@ declare class Internship {
 /**
  * @return an array holding only elements found in every element in `arrayOfSets`
  */
-declare function intersect(arrayOfSets: any): any[];
-declare function hasAnyOf(needles: any, haystack: any): boolean;
+declare function intersect<T>(arrayOfSets: Set<T>[]): T[];
+declare function hasAnyOf<T>(needles: T[], haystack: T[]): boolean;
 /**
  * parses the internships and sets up the filtersets
  */
@@ -108,8 +94,30 @@ declare class Internships {
     private readonly locations;
     private readonly interests;
     constructor(dataFeedEntry: any);
+    findByNameAndLocation(name: string, location: string): Internship;
     onFilterChange(): void;
 }
+declare const deferredInternships: Deferred<Internships>;
+/**
+ * Find or Create the Spreadsheet
+ */
+declare class StudentSheet {
+    private readonly sheetId;
+    private readonly internships;
+    private readonly savedFilters;
+    constructor();
+    /**
+     * @returns the prior saved state of the given filter
+     */
+    getFilterState(filterId: string): Promise<boolean>;
+    isInternshipSaved(internship: Internship): Promise<boolean>;
+    setFilterState(filterId: string, checked: boolean): Promise<void>;
+    private getSpreadsheetId();
+    private readFiltersSheet();
+    private readInternshipsSheet();
+}
+declare function stringToBoolean(s: string): boolean;
+declare const studentSheet: StudentSheet;
 /**
  * GeoLocation Data
  */

@@ -51,110 +51,6 @@ function loadClients() {
   )
 }
 
-/**
- * Find or Create the Spreadsheet
- */
-class StudentSheet {
-  private readonly sheetIdPromise
-  constructor() {
-    this.sheetIdPromise = this.getSpreadsheetId()
-  }
-  /**
-   * @returns the prior saved state of the given filter
-   */
-  getFilterState(filterId: string): boolean {
-    return true
-  }
-
-  setFilterState(filterId: string, checked: boolean) {
-    return true
-  }
-
-  private async getSpreadsheetId(): Promise<string> {
-    await driveClientLoaded.promise
-    await sheetClientLoaded.promise
-
-    // Does the sheet exist already?
-    const deferredFiles = new Deferred<any[]>()
-    gapi.client.drive.files.list({
-      pageSize: 1,
-      q: `properties has { key='InternshipsFor' and value='${(await user).getEmail()}'}`
-    }).execute(result => deferredFiles.resolve(result.files))
-
-    const files = await deferredFiles.promise
-
-    if (files && files.length === 1 && files[0].id) {
-      const spreadsheetId = files[0].id
-      console.log("Found prior Sheet " + spreadsheetId)
-      return spreadsheetId
-    }
-
-    // Darn, we have to create it:
-
-    const response = await gapi.client.sheets.spreadsheets.create({
-      "properties": {
-        "title": `Saved Internships for ${(await user).getName()}`
-      }
-    })
-
-    const spreadsheetId = response.result.spreadsheetId
-
-    // And set the metadata to find it later
-
-    const driveUpdateResponse = await gapi.client.drive.files.update({
-      fileId: spreadsheetId,
-      properties: {
-        InternshipsFor: (await user).getEmail()
-      }
-    })
-
-    console.log("Yay got drive update response " + JSON.stringify(driveUpdateResponse))
-
-    // Create 3 sheets: one for the saved internships
-
-    const renameSavedInternshipRequest = {
-      updateSheetProperties: {
-        properties: {
-          title: "Internships",
-          index: 0
-        },
-        fields: "title"
-      }
-    }
-    const addLocationSheetRequest = {
-      addSheet: {
-        properties: {
-          title: "Locations",
-          index: 1
-        }
-      }
-    }
-    const addInterestsSheetRequest = {
-      addSheet: {
-        properties: {
-          title: "Interests",
-          index: 2
-        }
-      }
-    }
-
-    const request = {
-      spreadsheetId,
-      requests: [
-        renameSavedInternshipRequest,
-        addLocationSheetRequest,
-        addInterestsSheetRequest
-      ],
-      responseIncludeGridData: false
-    }
-    const batchUpdateResponse = await gapi.client.sheets.spreadsheets.batchUpdate(request)
-    console.log("Got batch update response: " + JSON.stringify(batchUpdateResponse))
-    return spreadsheetId
-  }
-}
-
-const studentSheet = new StudentSheet()
-
 // Find and display internships from form sheet
 /*
  How things need to render:
@@ -289,8 +185,8 @@ function splitAndTrim(s) {
 
 let internshipCounter = 0
 class Internship {
-  readonly locations: Array<string>
-  readonly interests: Array<string>
+  readonly locations: string[]
+  readonly interests: string[]
   readonly name: string
   readonly jobDescription: string
   readonly contactInfo: string
@@ -379,11 +275,11 @@ class Internship {
 /**
  * @return an array holding only elements found in every element in `arrayOfSets`
  */
-function intersect(arrayOfSets) {
+function intersect<T>(arrayOfSets: Set<T>[]): T[] {
   return [...arrayOfSets.pop()].filter(element => arrayOfSets.every(set => set.has(element)))
 }
 
-function hasAnyOf(needles, haystack) {
+function hasAnyOf<T>(needles: T[], haystack: T[]) {
   return needles.findIndex(needle => haystack.includes(needle)) !== -1
 }
 
@@ -391,7 +287,7 @@ function hasAnyOf(needles, haystack) {
  * parses the internships and sets up the filtersets
  */
 class Internships {
-  private readonly internships: Array<Internship>
+  private readonly internships: Internship[]
   private readonly locations: FilterSet
   private readonly interests: FilterSet
   constructor(dataFeedEntry) {
@@ -409,6 +305,12 @@ class Internships {
     this.onFilterChange()
   }
 
+  findByNameAndLocation(name: string, location: string): Internship {
+    return this.internships.find(ea =>
+      ea.name === name && hasAnyOf(location.split(","), ea.locations)
+    )
+  }
+
   onFilterChange() {
     const selectedLocations = this.locations.selectedFilterNames()
     const selectedInterests = this.interests.selectedFilterNames()
@@ -419,15 +321,147 @@ class Internships {
     toShow.forEach(ea => ea.show())
     const toHide = this.internships.filter(internship => !toShow.includes(internship))
     toHide.forEach(ea => ea.hide())
-
   }
 }
+
+const deferredInternships = new Deferred<Internships>()
+
+/**
+ * Find or Create the Spreadsheet
+ */
+class StudentSheet {
+  private readonly sheetId: Promise<string>
+  private readonly internships: Promise<Set<Internship>>
+  private readonly savedFilters: Promise<Map<string, boolean>>
+  constructor() {
+    this.sheetId = this.getSpreadsheetId()
+    this.internships = this.readInternshipsSheet()
+    this.savedFilters = this.readFiltersSheet()
+  }
+
+  /**
+   * @returns the prior saved state of the given filter
+   */
+  async getFilterState(filterId: string): Promise<boolean> {
+    return (await this.savedFilters).get(filterId) || false
+  }
+
+  async isInternshipSaved(internship: Internship): Promise<boolean> {
+    return (await this.internships).has(internship)
+  }
+
+  async setFilterState(filterId: string, checked: boolean) {
+    throw new Error("TODO")
+  }
+
+  private async getSpreadsheetId(): Promise<string> {
+    await driveClientLoaded.promise
+    await sheetClientLoaded.promise
+
+    // Does the sheet exist already?
+    const deferredFiles = new Deferred<any[]>()
+    gapi.client.drive.files.list({
+      pageSize: 1,
+      q: `properties has { key='InternshipsFor' and value='${(await user).getEmail()}'}`
+    }).execute(result => deferredFiles.resolve(result.files))
+
+    const files = await deferredFiles.promise
+
+    if (files && files.length === 1 && files[0].id) {
+      const spreadsheetId = files[0].id
+      console.log("Found prior Sheet " + spreadsheetId)
+      return spreadsheetId
+    }
+
+    // Darn, we have to create it:
+
+    const response = await gapi.client.sheets.spreadsheets.create({
+      "properties": {
+        "title": `Saved Internships for ${(await user).getName()}`
+      }
+    })
+
+    const spreadsheetId = response.result.spreadsheetId
+
+    // And set the metadata to find it later
+
+    const driveUpdateResponse = await gapi.client.drive.files.update({
+      fileId: spreadsheetId,
+      properties: {
+        InternshipsFor: (await user).getEmail()
+      }
+    })
+
+    console.log("Yay got drive update response " + JSON.stringify(driveUpdateResponse))
+
+    // Create 3 sheets: one for the saved internships
+
+    const renameSavedInternshipRequest = {
+      updateSheetProperties: {
+        properties: {
+          title: "Internships",
+          index: 0
+        },
+        fields: "title"
+      }
+    }
+    const addFilterSheetRequest = {
+      addSheet: {
+        properties: {
+          title: "Filters",
+          index: 1
+        }
+      }
+    }
+
+    const request = {
+      spreadsheetId,
+      requests: [
+        renameSavedInternshipRequest,
+        addFilterSheetRequest
+      ],
+      responseIncludeGridData: false
+    }
+    const batchUpdateResponse = await gapi.client.sheets.spreadsheets.batchUpdate(request)
+    console.log("Got batch update response: " + JSON.stringify(batchUpdateResponse))
+    return spreadsheetId
+  }
+
+  private async readFiltersSheet(): Promise<Map<string, boolean>> {
+    const spreadsheetId = await this.sheetId
+    const response = await gapi.client.sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: "Filters"
+    })
+    return new Map<string, boolean>(
+      response.values.map(([filterId, value]) => [filterId, stringToBoolean(value)])
+    )
+  }
+
+  private async readInternshipsSheet(): Promise<Set<Internship>> {
+    const spreadsheetId = await this.sheetId
+    const response = await gapi.client.sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: "Internships"
+    })
+    const internships: Internships = await deferredInternships.promise
+    return new Set<Internship>(
+      response.values.map(([name, location]) => internships.findByNameAndLocation(name, location))
+    )
+  }
+}
+
+function stringToBoolean(s: string): boolean {
+  return ["true", "yes", "t", "y"].includes(s && s.toLowerCase())
+}
+
+const studentSheet = new StudentSheet()
 
 // Create Internships Array from Sheet
 // tslint:disable-next-line:max-line-length
 $.getJSON("https://spreadsheets.google.com/feeds/list/1KiBBwtRUjufhhD5FOwC0b37asXf48Ug1m8zL5WrHCBA/default/public/values?alt=json", function (data) {
   try {
-    new Internships(data.feed.entry)
+    deferredInternships.resolve(new Internships(data.feed.entry))
   } catch (error) {
     alert("Couldn't load available internships. Sorry.")
     console.log(error)

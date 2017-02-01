@@ -37,95 +37,6 @@ function loadClients() {
     sheetClientLoaded.resolve(gapi.client.load("https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest"));
     driveClientLoaded.resolve(gapi.client.load("https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"));
 }
-/**
- * Find or Create the Spreadsheet
- */
-class StudentSheet {
-    constructor() {
-        this.sheetIdPromise = this.getSpreadsheetId();
-    }
-    /**
-     * @returns the prior saved state of the given filter
-     */
-    getFilterState(filterId) {
-        return true;
-    }
-    setFilterState(filterId, checked) {
-        return true;
-    }
-    getSpreadsheetId() {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield driveClientLoaded.promise;
-            yield sheetClientLoaded.promise;
-            // Does the sheet exist already?
-            const deferredFiles = new Deferred();
-            gapi.client.drive.files.list({
-                pageSize: 1,
-                q: `properties has { key='InternshipsFor' and value='${(yield user).getEmail()}'}`
-            }).execute(result => deferredFiles.resolve(result.files));
-            const files = yield deferredFiles.promise;
-            if (files && files.length === 1 && files[0].id) {
-                const spreadsheetId = files[0].id;
-                console.log("Found prior Sheet " + spreadsheetId);
-                return spreadsheetId;
-            }
-            // Darn, we have to create it:
-            const response = yield gapi.client.sheets.spreadsheets.create({
-                "properties": {
-                    "title": `Saved Internships for ${(yield user).getName()}`
-                }
-            });
-            const spreadsheetId = response.result.spreadsheetId;
-            // And set the metadata to find it later
-            const driveUpdateResponse = yield gapi.client.drive.files.update({
-                fileId: spreadsheetId,
-                properties: {
-                    InternshipsFor: (yield user).getEmail()
-                }
-            });
-            console.log("Yay got drive update response " + JSON.stringify(driveUpdateResponse));
-            // Create 3 sheets: one for the saved internships
-            const renameSavedInternshipRequest = {
-                updateSheetProperties: {
-                    properties: {
-                        title: "Internships",
-                        index: 0
-                    },
-                    fields: "title"
-                }
-            };
-            const addLocationSheetRequest = {
-                addSheet: {
-                    properties: {
-                        title: "Locations",
-                        index: 1
-                    }
-                }
-            };
-            const addInterestsSheetRequest = {
-                addSheet: {
-                    properties: {
-                        title: "Interests",
-                        index: 2
-                    }
-                }
-            };
-            const request = {
-                spreadsheetId,
-                requests: [
-                    renameSavedInternshipRequest,
-                    addLocationSheetRequest,
-                    addInterestsSheetRequest
-                ],
-                responseIncludeGridData: false
-            };
-            const batchUpdateResponse = yield gapi.client.sheets.spreadsheets.batchUpdate(request);
-            console.log("Got batch update response: " + JSON.stringify(batchUpdateResponse));
-            return spreadsheetId;
-        });
-    }
-}
-const studentSheet = new StudentSheet();
 // Find and display internships from form sheet
 /*
  How things need to render:
@@ -327,6 +238,9 @@ class Internships {
         this.internships.map(each => each.render());
         this.onFilterChange();
     }
+    findByNameAndLocation(name, location) {
+        return this.internships.find(ea => ea.name === name && hasAnyOf(location.split(","), ea.locations));
+    }
     onFilterChange() {
         const selectedLocations = this.locations.selectedFilterNames();
         const selectedInterests = this.interests.selectedFilterNames();
@@ -337,11 +251,127 @@ class Internships {
         toHide.forEach(ea => ea.hide());
     }
 }
+const deferredInternships = new Deferred();
+/**
+ * Find or Create the Spreadsheet
+ */
+class StudentSheet {
+    constructor() {
+        this.sheetId = this.getSpreadsheetId();
+        this.internships = this.readInternshipsSheet();
+        this.savedFilters = this.readFiltersSheet();
+    }
+    /**
+     * @returns the prior saved state of the given filter
+     */
+    getFilterState(filterId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (yield this.savedFilters).get(filterId) || false;
+        });
+    }
+    isInternshipSaved(internship) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (yield this.internships).has(internship);
+        });
+    }
+    setFilterState(filterId, checked) {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error("TODO");
+        });
+    }
+    getSpreadsheetId() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield driveClientLoaded.promise;
+            yield sheetClientLoaded.promise;
+            // Does the sheet exist already?
+            const deferredFiles = new Deferred();
+            gapi.client.drive.files.list({
+                pageSize: 1,
+                q: `properties has { key='InternshipsFor' and value='${(yield user).getEmail()}'}`
+            }).execute(result => deferredFiles.resolve(result.files));
+            const files = yield deferredFiles.promise;
+            if (files && files.length === 1 && files[0].id) {
+                const spreadsheetId = files[0].id;
+                console.log("Found prior Sheet " + spreadsheetId);
+                return spreadsheetId;
+            }
+            // Darn, we have to create it:
+            const response = yield gapi.client.sheets.spreadsheets.create({
+                "properties": {
+                    "title": `Saved Internships for ${(yield user).getName()}`
+                }
+            });
+            const spreadsheetId = response.result.spreadsheetId;
+            // And set the metadata to find it later
+            const driveUpdateResponse = yield gapi.client.drive.files.update({
+                fileId: spreadsheetId,
+                properties: {
+                    InternshipsFor: (yield user).getEmail()
+                }
+            });
+            console.log("Yay got drive update response " + JSON.stringify(driveUpdateResponse));
+            // Create 3 sheets: one for the saved internships
+            const renameSavedInternshipRequest = {
+                updateSheetProperties: {
+                    properties: {
+                        title: "Internships",
+                        index: 0
+                    },
+                    fields: "title"
+                }
+            };
+            const addFilterSheetRequest = {
+                addSheet: {
+                    properties: {
+                        title: "Filters",
+                        index: 1
+                    }
+                }
+            };
+            const request = {
+                spreadsheetId,
+                requests: [
+                    renameSavedInternshipRequest,
+                    addFilterSheetRequest
+                ],
+                responseIncludeGridData: false
+            };
+            const batchUpdateResponse = yield gapi.client.sheets.spreadsheets.batchUpdate(request);
+            console.log("Got batch update response: " + JSON.stringify(batchUpdateResponse));
+            return spreadsheetId;
+        });
+    }
+    readFiltersSheet() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const spreadsheetId = yield this.sheetId;
+            const response = yield gapi.client.sheets.spreadsheets.values.get({
+                spreadsheetId,
+                range: "Filters"
+            });
+            return new Map(response.values.map(([filterId, value]) => [filterId, stringToBoolean(value)]));
+        });
+    }
+    readInternshipsSheet() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const spreadsheetId = yield this.sheetId;
+            const response = yield gapi.client.sheets.spreadsheets.values.get({
+                spreadsheetId,
+                range: "Internships"
+            });
+            const internships = yield deferredInternships.promise;
+            return new Set(response.values.map(([name, location]) => internships.findByNameAndLocation(name, location)));
+        });
+    }
+}
+function stringToBoolean(s) {
+    return ["true", "yes", "t", "y"].includes(s && s.toLowerCase());
+}
+const studentSheet = new StudentSheet();
 // Create Internships Array from Sheet
 // tslint:disable-next-line:max-line-length
 $.getJSON("https://spreadsheets.google.com/feeds/list/1KiBBwtRUjufhhD5FOwC0b37asXf48Ug1m8zL5WrHCBA/default/public/values?alt=json", function (data) {
     try {
-        new Internships(data.feed.entry);
+        deferredInternships.resolve(new Internships(data.feed.entry));
     }
     catch (error) {
         alert("Couldn't load available internships. Sorry.");
