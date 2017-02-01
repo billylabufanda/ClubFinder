@@ -35,6 +35,7 @@ declare class StudentSheet {
     setFilterState(filterId: string, checked: boolean): boolean;
     private getSpreadsheetId();
 }
+declare const studentSheet: StudentSheet;
 /**
  * Holds the types of a given kind of filter, like "location" or "interest"
  */

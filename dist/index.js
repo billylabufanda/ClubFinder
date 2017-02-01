@@ -3,7 +3,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
+        step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
 class Deferred {
@@ -72,23 +72,60 @@ class StudentSheet {
             // Darn, we have to create it:
             const response = yield gapi.client.sheets.spreadsheets.create({
                 "properties": {
-                    "title": `Tindernship Profile for ${(yield user).getName()}`
+                    "title": `Saved Internships for ${(yield user).getName()}`
                 }
             });
             const spreadsheetId = response.result.spreadsheetId;
             // And set the metadata to find it later
-            gapi.client.drive.files.update({
+            const driveUpdateResponse = yield gapi.client.drive.files.update({
                 fileId: spreadsheetId,
                 properties: {
                     InternshipsFor: (yield user).getEmail()
                 }
-            }).execute(result => {
-                console.log("Created new sheet " + spreadsheetId);
-                return spreadsheetId;
             });
+            console.log("Yay got drive update response " + JSON.stringify(driveUpdateResponse));
+            // Create 3 sheets: one for the saved internships
+            const renameSavedInternshipRequest = {
+                updateSheetProperties: {
+                    properties: {
+                        title: "Internships",
+                        index: 0
+                    },
+                    fields: "title"
+                }
+            };
+            const addLocationSheetRequest = {
+                addSheet: {
+                    properties: {
+                        title: "Locations",
+                        index: 1
+                    }
+                }
+            };
+            const addInterestsSheetRequest = {
+                addSheet: {
+                    properties: {
+                        title: "Interests",
+                        index: 2
+                    }
+                }
+            };
+            const request = {
+                spreadsheetId,
+                requests: [
+                    renameSavedInternshipRequest,
+                    addLocationSheetRequest,
+                    addInterestsSheetRequest
+                ],
+                responseIncludeGridData: false
+            };
+            const batchUpdateResponse = yield gapi.client.sheets.spreadsheets.batchUpdate(request);
+            console.log("Got batch update response: " + JSON.stringify(batchUpdateResponse));
+            return spreadsheetId;
         });
     }
 }
+const studentSheet = new StudentSheet();
 // Find and display internships from form sheet
 /*
  How things need to render:

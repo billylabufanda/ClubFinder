@@ -93,7 +93,7 @@ class StudentSheet {
 
     const response = await gapi.client.sheets.spreadsheets.create({
       "properties": {
-        "title": `Tindernship Profile for ${(await user).getName()}`
+        "title": `Saved Internships for ${(await user).getName()}`
       }
     })
 
@@ -101,17 +101,59 @@ class StudentSheet {
 
     // And set the metadata to find it later
 
-    gapi.client.drive.files.update({
+    const driveUpdateResponse = await gapi.client.drive.files.update({
       fileId: spreadsheetId,
       properties: {
         InternshipsFor: (await user).getEmail()
       }
-    }).execute(result => {
-      console.log("Created new sheet " + spreadsheetId)
-      return spreadsheetId
     })
+
+    console.log("Yay got drive update response " + JSON.stringify(driveUpdateResponse))
+
+    // Create 3 sheets: one for the saved internships
+
+    const renameSavedInternshipRequest = {
+      updateSheetProperties: {
+        properties: {
+          title: "Internships",
+          index: 0
+        },
+        fields: "title"
+      }
+    }
+    const addLocationSheetRequest = {
+      addSheet: {
+        properties: {
+          title: "Locations",
+          index: 1
+        }
+      }
+    }
+    const addInterestsSheetRequest = {
+      addSheet: {
+        properties: {
+          title: "Interests",
+          index: 2
+        }
+      }
+    }
+
+    const request = {
+      spreadsheetId,
+      requests: [
+        renameSavedInternshipRequest,
+        addLocationSheetRequest,
+        addInterestsSheetRequest
+      ],
+      responseIncludeGridData: false
+    }
+    const batchUpdateResponse = await gapi.client.sheets.spreadsheets.batchUpdate(request)
+    console.log("Got batch update response: " + JSON.stringify(batchUpdateResponse))
+    return spreadsheetId
   }
 }
+
+const studentSheet = new StudentSheet()
 
 // Find and display internships from form sheet
 /*
