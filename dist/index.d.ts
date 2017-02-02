@@ -13,15 +13,11 @@ interface User {
     getEmail(): string;
 }
 declare const deferredUser: Deferred<User>;
-declare const user: Promise<User>;
-declare const driveClientLoaded: Deferred<void>;
-declare const sheetClientLoaded: Deferred<void>;
 declare const gapi: any;
 declare const $: any;
 /**
  * Load Sheets API client library.
  */
-declare function loadClients(): void;
 /**
  * Holds the types of a given kind of filter, like "location" or "interest"
  */
@@ -76,14 +72,11 @@ declare class Internship {
     show(): void;
     hide(): void;
     bgStyle(): string;
-    render(): void;
+    render(): Promise<void>;
     setSaved(newSavedState: boolean): void;
     renderSaveButton(): void;
     saveClicked(): void;
 }
-/**
- * Intersect an array of sets
- */
 /**
  * @return an array holding only elements found in every element in `arrayOfSets`
  */
@@ -106,29 +99,16 @@ declare const deferredInternships: Deferred<Internships>;
  */
 declare class StudentSheet {
     private readonly sheetId;
-    private readonly savedFilters;
     constructor();
-    /**
-     * @returns the prior saved state of the given filter
-     */
-    getFilterState(filterId: string): Promise<boolean>;
-    setFilterState(filterId: string, checked: boolean): Promise<void>;
     private getSpreadsheetId();
     private readFiltersSheet();
     private readInternshipsSheet();
 }
 declare function stringToBoolean(s: string): boolean;
 declare const studentSheet: StudentSheet;
-/**
- * GeoLocation Data
- */
-declare function geoFindMe(): void;
 declare function geoLocationFilter(): boolean;
 declare const CLIENT_ID = "246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com";
 declare const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive";
-/**
- * When Google Sign-in succeeds
- */
-declare function checkAuth(): void;
-declare function handleAuthResult(authResult: any): Promise<void>;
-declare function handleAuthClick(event: any): boolean;
+declare function handleClientLoad(): void;
+declare function updateSigninStatus(isSignedIn: any): void;
+declare function handleSignInClick(event: any): void;

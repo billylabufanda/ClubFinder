@@ -31,10 +31,7 @@ interface User {
   getEmail(): string
 }
 
-const deferredUser = new Deferred<User>()
-const user = deferredUser.promise
-const driveClientLoaded = new Deferred<void>()
-const sheetClientLoaded = new Deferred<void>()
+const deferredUser = new Deferred<User | undefined>()
 
 declare const gapi: any
 declare const $: any
@@ -42,14 +39,6 @@ declare const $: any
 /**
  * Load Sheets API client library.
  */
-function loadClients() {
-  sheetClientLoaded.resolve(
-    gapi.client.load("https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest")
-  )
-  driveClientLoaded.resolve(
-    gapi.client.load("https://www.googleapis.com/discovery/v1/apis/drive/v3/rest")
-  )
-}
 
 // Find and display internships from form sheet
 /*
@@ -225,7 +214,7 @@ class Internship {
   // TODO later? Add to the card-image div:
   // <i class="material-icons ${this.mySelector}-save" title="Unsaved">star_border</i>
 
-  render() {
+  async render() {
     $("#InternshipCards").append(
       `<div class="col s12 m6 l6" id="${this.mySelector}">
         <div class="card sticky-action z-depth-1">
@@ -257,6 +246,10 @@ class Internship {
         </div>
       </div>`)
     $("#" + this.mySelector).on("click", ".save", () => this.saveClicked())
+    const user = await deferredUser.promise
+    if (!user) {
+      $("#" + this.mySelector + " .card-action").remove()
+    }
   }
 
   setSaved(newSavedState: boolean) {
@@ -277,20 +270,6 @@ class Internship {
     this.renderSaveButton()
   }
 }
-
-/**
- * Intersect an array of sets
- */
-// function intersect(arrayOfSets:Array<) {
-//   const intersection = new Set()
-//   const lastSet = arrayOfSets.pop()
-//   for (element of lastSet) {
-//     if (arrayOfSets.every(set => set.has(element))) {
-//       intersection.add(element)
-//     }
-//   }
-//   return intersection
-// }
 
 /**
  * @return an array holding only elements found in every element in `arrayOfSets`
@@ -350,28 +329,18 @@ const deferredInternships = new Deferred<Internships>()
  * Find or Create the Spreadsheet
  */
 class StudentSheet {
-  private readonly sheetId: Promise<string>
-  private readonly savedFilters: Promise<Map<string, boolean>>
+  private readonly sheetId: Promise<string | undefined>
   constructor() {
     this.sheetId = this.getSpreadsheetId()
     this.readInternshipsSheet()
-    this.savedFilters = this.readFiltersSheet()
+    this.readFiltersSheet()
   }
 
-  /**
-   * @returns the prior saved state of the given filter
-   */
-  async getFilterState(filterId: string): Promise<boolean> {
-    return (await this.savedFilters).get(filterId) || false
-  }
-
-  async setFilterState(filterId: string, checked: boolean) {
-    throw new Error("TODO")
-  }
-
-  private async getSpreadsheetId(): Promise<string> {
-    await driveClientLoaded.promise
-    await sheetClientLoaded.promise
+  private async getSpreadsheetId(): Promise<string | undefined> {
+    const user = await deferredUser.promise
+    if (user == null) {
+      return
+    }
 
     // Does the sheet exist already?
     const deferredFiles = new Deferred<any[]>()
@@ -482,32 +451,12 @@ const studentSheet = new StudentSheet()
 $.getJSON("https://spreadsheets.google.com/feeds/list/1KiBBwtRUjufhhD5FOwC0b37asXf48Ug1m8zL5WrHCBA/default/public/values?alt=json", function (data) {
   try {
     deferredInternships.resolve(new Internships(data.feed.entry))
+    console.log("Finished loading internships")
   } catch (error) {
     alert("Couldn't load available internships. Sorry.")
     console.log(error)
   }
 })
-
-/**
- * GeoLocation Data
- */
-function geoFindMe() {
-  if (!navigator.geolocation) {
-    alert("Geolocation is not supported on this browser")
-    return
-  }
-
-  function success(position) {
-    const latitude = position.coords.latitude
-    const longitude = position.coords.longitude
-    console.log("Your position is: " + latitude + ", " + latitude)
-  }
-
-  function error() {
-    alert("Unable to retrieve your location")
-  }
-  navigator.geolocation.getCurrentPosition(success, error)
-}
 
 function geoLocationFilter() {
   return true
@@ -516,91 +465,40 @@ function geoLocationFilter() {
 const CLIENT_ID = "246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com"
 const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
 
-/**
- * When Google Sign-in succeeds
- */
-
-// async function onSuccess(googleUser) {
-//   const user = googleUser.getBasicProfile()
-//   console.log("Got " + JSON.stringify({ user }))
-//   // location.reload(true)
-// }
-
-// function onFailure(error) {
-//   console.log("oh snap, we're not signed in")
-//   console.log(error)
-// }
-
-// // TODO: try to delete the meta tag and see if it still works
-// function goGoGoogle() {
-//   gapi.signin2.render("google-signin-button", {
-//     "scope": SCOPES,
-//     "client_id": CLIENT_ID,
-//     "theme": "dark",
-//     "onsuccess": onSuccess,
-//     "onfailure": onFailure
-//   })
-// }
-
-// async function checkAuth() {
-//   await gapi.load("auth2")
-//   const auth2 = await gapi.auth2.init({
-//     "client_id": CLIENT_ID,
-//     "scope": SCOPES
-//   })
-//   if (auth2.isSignedIn.get()) {
-//     await auth2.signIn()
-//     const googUser = auth2.currentUser.get()
-//     console.log("YAY user is " + JSON.stringify(googUser))
-//     deferredUser.resolve(googUser)
-//     loadClients()
-//   } else {
-//     console.log("BOO user is not signed in yet")
-//     deferredUser.resolve(undefined)
-//   }
-// }
-function checkAuth() {
-  gapi.auth.authorize(
-    {
-      "client_id": CLIENT_ID,
-      "scope": SCOPES,
-      "immediate": true
-    },
-    handleAuthResult
-  )
-}
-
-async function handleAuthResult(authResult) {
-  console.log("didthebuttongetclicked")
-  if (authResult && !authResult.error) {
-    $("#sign-in-button").text("Signed In To Google")
-    // load client library.
-    // const googUser = auth2.currentUser.get()
-    console.log("YAY user is " + JSON.stringify(authResult))
-    deferredUser.resolve(googUser)
-    loadClients()
+function handleClientLoad() {
+  gapi.load("client:auth2", () => {
+    gapi.client.init({
+      apiKey: "AIzaSyBVE4YYgpUF8Kc0gTm_DGEd81zsP4i6P10",
+      discoveryDocs: [
+        "https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest",
+        "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"
+      ],
+      clientId: "246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com",
+      scope: "email profile"
+    }).then(function () {
+      const auth2 = gapi.auth2.getAuthInstance()
+      auth2.isSignedIn.listen(updateSigninStatus)
+      updateSigninStatus(auth2.isSignedIn.get())
+    })
   })
-} else {
-  console.log("BOO no user")
-  deferredUser.resolve(undefined)
-
-  // Show auth UI, allowing the user to initiate authorization by
-  // clicking authorize button.
-}
 }
 
-function handleAuthClick(event) {
-  gapi.auth.authorize(
-    {
-      "client_id": CLIENT_ID,
-      "scope": SCOPES,
-      immediate: false
-    },
-    handleAuthResult)
-  return false
+function updateSigninStatus(isSignedIn) {
+  console.log("updateSigninStatus: isSignedIn is " + isSignedIn)
+  if (isSignedIn) {
+    let profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile()
+    console.log("Student email: " + profile.getEmail())
+    $("#sign-in-button").text("Signed in").removeAttr("onclick")
+    deferredUser.resolve(profile)
+  } else {
+    deferredUser.resolve(undefined)
+  }
+}
+
+function handleSignInClick(event) {
+  gapi.auth2.getAuthInstance().signIn()
 }
 
 $(document).ready(function () {
   $(".button-collapse").sideNav()
-  // geoFindMe()
 })
