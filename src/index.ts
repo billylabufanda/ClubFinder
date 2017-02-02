@@ -65,16 +65,12 @@ Render the UI
  * Holds the types of a given kind of filter, like "location" or "interest"
  */
 class FilterSet {
-  readonly name: string
   readonly id: string
-  readonly filterClickListener: () => void
   private readonly filterNameToFilter: Map<string, Filter>
 
-  constructor(name: string, filterClickListener: () => void) {
-    this.name = name
+  constructor(readonly name: string, readonly filterClickListener: () => void) {
     this.filterNameToFilter = new Map() // "San Jose" => new Filter("San Jose")
     this.id = name + "Filters"
-    this.filterClickListener = filterClickListener
   }
 
   filterNames() {
@@ -119,12 +115,8 @@ class FilterSet {
  */
 class Filter {
   readonly id: string
-  readonly name: string
-  private readonly filterSet: FilterSet
   private checked: boolean = true
-  constructor(filterSet: FilterSet, name: string) {
-    this.filterSet = filterSet
-    this.name = name
+  constructor(readonly filterSet: FilterSet, readonly name: string) {
     const safeName = this.name.toLowerCase().replace(/[^a-z0-9 ]+/g, "").trim().replace(/ +/g, "-")
     this.id = "filter-" + this.filterSet.name + "-" + safeName
   }
@@ -188,7 +180,7 @@ class Internship {
   private readonly mySelector: string
   private saved: boolean = false
 
-  constructor(entry) {
+  constructor(readonly parent: Internships, entry) {
     this.id = ++internshipCounter
     this.mySelector = "Internship" + this.id
     this.name = entry.gsx$nameofcompany.$t
@@ -254,6 +246,10 @@ class Internship {
     }
   }
 
+  getSaved(): boolean {
+    return this.saved
+  }
+
   setSaved(newSavedState: boolean) {
     this.saved = newSavedState
     this.renderSaveButton()
@@ -270,6 +266,7 @@ class Internship {
   saveClicked() {
     this.saved = !this.saved
     this.renderSaveButton()
+    this.parent.saveInternships()
   }
 }
 
@@ -295,7 +292,7 @@ class Internships {
   private readonly filtersByFilterId = new Map<string, Filter>()
   private readonly studentSheet = new Deferred<StudentSheet>()
   constructor(dataFeedEntry) {
-    this.internships = dataFeedEntry.map(e => new Internship(e))
+    this.internships = dataFeedEntry.map(e => new Internship(this, e))
     this.locations = new FilterSet("locations", () => this.onFilterChange())
     this.interests = new FilterSet("interests", () => this.onFilterChange())
     this.internships.forEach(internship => {
@@ -376,6 +373,14 @@ class Internships {
       return studentSheet.writeFiltersSheet(filters)
     }
   }
+  async saveInternships() {
+    const studentSheet = await this.studentSheet.promise
+    if (studentSheet) {
+      return studentSheet.writeInternshipsSheet(
+        this.internships.filter(internship => internship.getSaved())
+      )
+    }
+  }
 }
 
 interface SavedInternship {
@@ -387,6 +392,7 @@ interface SavedInternship {
  * Find or Create the Spreadsheet
  */
 class StudentSheet {
+  static readonly maxValues = 300 // no more than maxValues of filters or saved internships
   readonly savedFilters: Promise<Map<string, boolean>>
   readonly savedInternships: Promise<SavedInternship[]>
   private readonly sheetId: Promise<string | undefined>
@@ -398,22 +404,49 @@ class StudentSheet {
 
   async writeFiltersSheet(filters: Map<string, boolean>): Promise<void> {
     const spreadsheetId = await this.sheetId
-    const values = [...filters.entries()].sort()
+    const values = [...filters.entries()].map(([name, checked]) => [name, "" + checked]).sort()
+    while (values.length < StudentSheet.maxValues) {
+      values.push(["", ""])
+    }
     const response = await gapi.client.sheets.spreadsheets.values.update({
       spreadsheetId,
       valueInputOption: "RAW",
-      range: "Filters!A1:B300",
+      range: "Filters!A1:B" + StudentSheet.maxValues,
       values
     })
   }
 
   async writeInternshipsSheet(savedInternships: Internship[]): Promise<void> {
     const spreadsheetId = await this.sheetId
-    const values = [...savedInternships.entries()].sort()
+    const header = [
+      "Name of Company",
+      "Location",
+      "Field of Interest",
+      "Job Description",
+      "Number of Students",
+      "Contact Information",
+      "Type of Work"
+    ]
+
+    const values = [header, ...savedInternships.map(i =>
+      [
+        i.name,
+        i.locations.join(", "),
+        i.interests.join(", "),
+        i.jobDescription,
+        i.numberOfStudents,
+        i.contactInfo,
+        i.typeOfWork
+      ]
+    )]
+
+    while (values.length < StudentSheet.maxValues) {
+      values.push(["", "", "", "", "", "", ""])
+    }
     const response = await gapi.client.sheets.spreadsheets.values.update({
       spreadsheetId,
       valueInputOption: "RAW",
-      range: "Internships!A1:B200",
+      range: "Internships!A1:G" + StudentSheet.maxValues,
       values
     })
   }
@@ -509,7 +542,7 @@ class StudentSheet {
     const spreadsheetId = await this.sheetId
     const response = await gapi.client.sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Internships!A2:B200"
+      range: "Internships!A2:B" + StudentSheet.maxValues
     })
     return response.result.values.map(([name, location]) => {
       return { name, location }

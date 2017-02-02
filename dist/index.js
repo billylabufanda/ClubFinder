@@ -56,9 +56,9 @@ Render the UI
 class FilterSet {
     constructor(name, filterClickListener) {
         this.name = name;
+        this.filterClickListener = filterClickListener;
         this.filterNameToFilter = new Map(); // "San Jose" => new Filter("San Jose")
         this.id = name + "Filters";
-        this.filterClickListener = filterClickListener;
     }
     filterNames() {
         return [...this.filterNameToFilter.keys()].sort();
@@ -95,9 +95,9 @@ class FilterSet {
  */
 class Filter {
     constructor(filterSet, name) {
-        this.checked = true;
         this.filterSet = filterSet;
         this.name = name;
+        this.checked = true;
         const safeName = this.name.toLowerCase().replace(/[^a-z0-9 ]+/g, "").trim().replace(/ +/g, "-");
         this.id = "filter-" + this.filterSet.name + "-" + safeName;
     }
@@ -139,7 +139,8 @@ function splitAndTrim(s) {
 }
 let internshipCounter = 0;
 class Internship {
-    constructor(entry) {
+    constructor(parent, entry) {
+        this.parent = parent;
         this.saved = false;
         this.id = ++internshipCounter;
         this.mySelector = "Internship" + this.id;
@@ -201,6 +202,9 @@ class Internship {
             }
         });
     }
+    getSaved() {
+        return this.saved;
+    }
     setSaved(newSavedState) {
         this.saved = newSavedState;
         this.renderSaveButton();
@@ -213,6 +217,7 @@ class Internship {
     saveClicked() {
         this.saved = !this.saved;
         this.renderSaveButton();
+        this.parent.saveInternships();
     }
 }
 /**
@@ -231,7 +236,7 @@ class Internships {
     constructor(dataFeedEntry) {
         this.filtersByFilterId = new Map();
         this.studentSheet = new Deferred();
-        this.internships = dataFeedEntry.map(e => new Internship(e));
+        this.internships = dataFeedEntry.map(e => new Internship(this, e));
         this.locations = new FilterSet("locations", () => this.onFilterChange());
         this.interests = new FilterSet("interests", () => this.onFilterChange());
         this.internships.forEach(internship => {
@@ -303,6 +308,14 @@ class Internships {
             }
         });
     }
+    saveInternships() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const studentSheet = yield this.studentSheet.promise;
+            if (studentSheet) {
+                return studentSheet.writeInternshipsSheet(this.internships.filter(internship => internship.getSaved()));
+            }
+        });
+    }
 }
 /**
  * Find or Create the Spreadsheet
@@ -316,11 +329,14 @@ class StudentSheet {
     writeFiltersSheet(filters) {
         return __awaiter(this, void 0, void 0, function* () {
             const spreadsheetId = yield this.sheetId;
-            const values = [...filters.entries()].sort();
+            const values = [...filters.entries()].map(([name, checked]) => [name, "" + checked]).sort();
+            while (values.length < StudentSheet.maxValues) {
+                values.push(["", ""]);
+            }
             const response = yield gapi.client.sheets.spreadsheets.values.update({
                 spreadsheetId,
                 valueInputOption: "RAW",
-                range: "Filters!A1:B300",
+                range: "Filters!A1:B" + StudentSheet.maxValues,
                 values
             });
         });
@@ -328,11 +344,31 @@ class StudentSheet {
     writeInternshipsSheet(savedInternships) {
         return __awaiter(this, void 0, void 0, function* () {
             const spreadsheetId = yield this.sheetId;
-            const values = [...savedInternships.entries()].sort();
+            const header = [
+                "Name of Company",
+                "Location",
+                "Field of Interest",
+                "Job Description",
+                "Number of Students",
+                "Contact Information",
+                "Type of Work"
+            ];
+            const values = [header, ...savedInternships.map(i => [
+                    i.name,
+                    i.locations.join(", "),
+                    i.interests.join(", "),
+                    i.jobDescription,
+                    i.numberOfStudents,
+                    i.contactInfo,
+                    i.typeOfWork
+                ])];
+            while (values.length < StudentSheet.maxValues) {
+                values.push(["", "", "", "", "", "", ""]);
+            }
             const response = yield gapi.client.sheets.spreadsheets.values.update({
                 spreadsheetId,
                 valueInputOption: "RAW",
-                range: "Internships!A1:B200",
+                range: "Internships!A1:G" + StudentSheet.maxValues,
                 values
             });
         });
@@ -416,7 +452,7 @@ class StudentSheet {
             const spreadsheetId = yield this.sheetId;
             const response = yield gapi.client.sheets.spreadsheets.values.get({
                 spreadsheetId,
-                range: "Internships!A2:B200"
+                range: "Internships!A2:B" + StudentSheet.maxValues
             });
             return response.result.values.map(([name, location]) => {
                 return { name, location };
@@ -424,6 +460,7 @@ class StudentSheet {
         });
     }
 }
+StudentSheet.maxValues = 300; // no more than maxValues of filters or saved internships
 function stringToBoolean(s) {
     return ["true", "yes", "t", "y"].includes(s && s.toLowerCase());
 }

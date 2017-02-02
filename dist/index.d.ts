@@ -23,8 +23,8 @@ declare const $: any;
  */
 declare class FilterSet {
     readonly name: string;
-    readonly id: string;
     readonly filterClickListener: () => void;
+    readonly id: string;
     private readonly filterNameToFilter;
     constructor(name: string, filterClickListener: () => void);
     filterNames(): string[];
@@ -43,9 +43,9 @@ declare class FilterSet {
  * "San Jose" or "Engineering"
  */
 declare class Filter {
-    readonly id: string;
+    readonly filterSet: FilterSet;
     readonly name: string;
-    private readonly filterSet;
+    readonly id: string;
     private checked;
     constructor(filterSet: FilterSet, name: string);
     getChecked(): boolean;
@@ -58,6 +58,7 @@ declare function randomBlankImage(): string;
 declare function splitAndTrim(s: any): any;
 declare let internshipCounter: number;
 declare class Internship {
+    readonly parent: Internships;
     readonly locations: string[];
     readonly interests: string[];
     readonly name: string;
@@ -69,11 +70,12 @@ declare class Internship {
     private readonly id;
     private readonly mySelector;
     private saved;
-    constructor(entry: any);
+    constructor(parent: Internships, entry: any);
     show(): void;
     hide(): void;
     bgStyle(): string;
     render(): Promise<void>;
+    getSaved(): boolean;
     setSaved(newSavedState: boolean): void;
     renderSaveButton(): void;
     saveClicked(): void;
@@ -100,6 +102,7 @@ declare class Internships {
     loadSavedFilters(): Promise<void>;
     loadSavedInternships(): Promise<void>;
     saveFilters(): Promise<void>;
+    saveInternships(): Promise<void>;
 }
 interface SavedInternship {
     name: string;
@@ -109,6 +112,7 @@ interface SavedInternship {
  * Find or Create the Spreadsheet
  */
 declare class StudentSheet {
+    static readonly maxValues: number;
     readonly savedFilters: Promise<Map<string, boolean>>;
     readonly savedInternships: Promise<SavedInternship[]>;
     private readonly sheetId;
