@@ -118,9 +118,10 @@ class FilterSet {
  * "San Jose" or "Engineering"
  */
 class Filter {
+  readonly id: string
   readonly name: string
   private readonly filterSet: FilterSet
-  private readonly id: string
+  private checked: boolean = false
   constructor(filterSet, name) {
     this.filterSet = filterSet
     this.name = name
@@ -128,24 +129,25 @@ class Filter {
     this.id = "filter-" + this.filterSet.name + "-" + safeName
   }
 
-  getChecked() {
+  getChecked(): boolean {
     return $("#" + this.id).prop("checked")
   }
 
-  setChecked(newCheckedState) {
+  setChecked(newCheckedState: boolean) {
+    this.checked = newCheckedState
     $("#" + this.id).prop("checked", newCheckedState)
   }
 
   render() {
     $("#" + this.filterSet.id).append(
       `<div class="col s4">
-         <input type="checkbox" class="filled-in filter" id="${this.id}" checked="checked" />
+         <input type="checkbox" class="filled-in filter" id="${this.id}" ${this.checked ? `checked="checked"` : ""} />
          <label for="${this.id}">${this.name}</label>
        </div>`
     )
-    const self = this
-    $("#" + this.id).click(function () {
-      self.filterSet.filterClickListener()
+    $("#" + this.id).click(() => {
+      this.checked = this.getChecked()
+      this.filterSet.filterClickListener()
     })
   }
 }
@@ -289,6 +291,7 @@ class Internships {
   readonly internships: Internship[]
   readonly locations: FilterSet
   readonly interests: FilterSet
+  private readonly filtersByFilterId = new Map<string, Filter>()
   constructor(dataFeedEntry) {
     this.internships = dataFeedEntry.map(e => new Internship(e))
     this.locations = new FilterSet("locations", () => this.onFilterChange())
@@ -296,7 +299,10 @@ class Internships {
     this.internships.forEach(internship => {
       internship.locations.forEach(location => this.locations.addFilter(location))
       internship.interests.forEach(interest => this.interests.addFilter(interest))
-    })
+    });
+    [...this.locations.filters(), ...this.interests.filters()].forEach(filter =>
+      this.filtersByFilterId.set(filter.id, filter)
+    )
     this.locations.render()
     this.interests.render()
     $(".collapsible").collapsible()
@@ -308,6 +314,10 @@ class Internships {
     return this.internships.find(ea =>
       ea.name === name && hasAnyOf(location.split(","), ea.locations)
     )
+  }
+
+  findFilterById(filterId: string): Filter | undefined {
+    return this.filtersByFilterId.get(filterId)
   }
 
   onFilterChange() {
@@ -411,17 +421,18 @@ class StudentSheet {
     return spreadsheetId
   }
 
-  private async readFiltersSheet(): Promise<Map<string, boolean>> {
+  private async readFiltersSheet(): Promise<void> {
     const spreadsheetId = await this.sheetId
     const response = await gapi.client.sheets.spreadsheets.values.get({
       spreadsheetId,
       range: "Filters"
     })
-    return new Map<string, boolean>(
-      response.result.values.map(([filterId, value]) =>
-        [filterId, stringToBoolean(value)]
-      )
-    )
+    const internships: Internships = await deferredInternships.promise
+    response.result.values.forEach(([filterId, value]) => {
+      const checked = stringToBoolean(value)
+      const filter = internships.findFilterById(filterId)
+      if (filter != null) { filter.setChecked(checked) }
+    })
   }
 
   private async readInternshipsSheet(): Promise<void> {

@@ -95,6 +95,7 @@ class FilterSet {
  */
 class Filter {
     constructor(filterSet, name) {
+        this.checked = false;
         this.filterSet = filterSet;
         this.name = name;
         const safeName = this.name.toLowerCase().replace(/[^a-z0-9 ]+/g, "").trim().replace(/ +/g, "-");
@@ -104,16 +105,17 @@ class Filter {
         return $("#" + this.id).prop("checked");
     }
     setChecked(newCheckedState) {
+        this.checked = newCheckedState;
         $("#" + this.id).prop("checked", newCheckedState);
     }
     render() {
         $("#" + this.filterSet.id).append(`<div class="col s4">
-         <input type="checkbox" class="filled-in filter" id="${this.id}" checked="checked" />
+         <input type="checkbox" class="filled-in filter" id="${this.id}" ${this.checked ? `checked="checked"` : ""} />
          <label for="${this.id}">${this.name}</label>
        </div>`);
-        const self = this;
-        $("#" + this.id).click(function () {
-            self.filterSet.filterClickListener();
+        $("#" + this.id).click(() => {
+            this.checked = this.getChecked();
+            this.filterSet.filterClickListener();
         });
     }
 }
@@ -227,6 +229,7 @@ function hasAnyOf(needles, haystack) {
  */
 class Internships {
     constructor(dataFeedEntry) {
+        this.filtersByFilterId = new Map();
         this.internships = dataFeedEntry.map(e => new Internship(e));
         this.locations = new FilterSet("locations", () => this.onFilterChange());
         this.interests = new FilterSet("interests", () => this.onFilterChange());
@@ -234,6 +237,7 @@ class Internships {
             internship.locations.forEach(location => this.locations.addFilter(location));
             internship.interests.forEach(interest => this.interests.addFilter(interest));
         });
+        [...this.locations.filters(), ...this.interests.filters()].forEach(filter => this.filtersByFilterId.set(filter.id, filter));
         this.locations.render();
         this.interests.render();
         $(".collapsible").collapsible();
@@ -242,6 +246,9 @@ class Internships {
     }
     findByNameAndLocation(name, location) {
         return this.internships.find(ea => ea.name === name && hasAnyOf(location.split(","), ea.locations));
+    }
+    findFilterById(filterId) {
+        return this.filtersByFilterId.get(filterId);
     }
     onFilterChange() {
         const selectedLocations = this.locations.selectedFilterNames();
@@ -334,7 +341,14 @@ class StudentSheet {
                 spreadsheetId,
                 range: "Filters"
             });
-            return new Map(response.result.values.map(([filterId, value]) => [filterId, stringToBoolean(value)]));
+            const internships = yield deferredInternships.promise;
+            response.result.values.forEach(([filterId, value]) => {
+                const checked = stringToBoolean(value);
+                const filter = internships.findFilterById(filterId);
+                if (filter != null) {
+                    filter.setChecked(checked);
+                }
+            });
         });
     }
     readInternshipsSheet() {

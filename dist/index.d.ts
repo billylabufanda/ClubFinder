@@ -43,12 +43,13 @@ declare class FilterSet {
  * "San Jose" or "Engineering"
  */
 declare class Filter {
+    readonly id: string;
     readonly name: string;
     private readonly filterSet;
-    private readonly id;
+    private checked;
     constructor(filterSet: any, name: any);
-    getChecked(): any;
-    setChecked(newCheckedState: any): void;
+    getChecked(): boolean;
+    setChecked(newCheckedState: boolean): void;
     render(): void;
 }
 declare const blankImages: string[];
@@ -89,8 +90,10 @@ declare class Internships {
     readonly internships: Internship[];
     readonly locations: FilterSet;
     readonly interests: FilterSet;
+    private readonly filtersByFilterId;
     constructor(dataFeedEntry: any);
     findByNameAndLocation(name: string, location: string): Internship | undefined;
+    findFilterById(filterId: string): Filter | undefined;
     onFilterChange(): void;
 }
 declare const deferredInternships: Deferred<Internships>;
