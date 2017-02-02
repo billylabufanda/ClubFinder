@@ -121,7 +121,7 @@ class Filter {
   readonly id: string
   readonly name: string
   private readonly filterSet: FilterSet
-  private checked: boolean = false
+  private checked: boolean = true
   constructor(filterSet, name) {
     this.filterSet = filterSet
     this.name = name
@@ -218,7 +218,7 @@ class Internship {
 
   async render() {
     $("#InternshipCards").append(
-      `<div class="col s12 m6 l6" id="${this.mySelector}">
+      `<div class="col s12 m6 l6" id="${this.mySelector}" style="display:hidden">
         <div class="card sticky-action z-depth-1">
           <div class="card-image waves-effect waves-block waves-light"> 
             <img class="activator" style="${this.bgStyle()}" />
@@ -291,6 +291,7 @@ class Internships {
   readonly internships: Internship[]
   readonly locations: FilterSet
   readonly interests: FilterSet
+  readonly filters: Filter[]
   private readonly filtersByFilterId = new Map<string, Filter>()
   constructor(dataFeedEntry) {
     this.internships = dataFeedEntry.map(e => new Internship(e))
@@ -299,15 +300,18 @@ class Internships {
     this.internships.forEach(internship => {
       internship.locations.forEach(location => this.locations.addFilter(location))
       internship.interests.forEach(interest => this.interests.addFilter(interest))
-    });
-    [...this.locations.filters(), ...this.interests.filters()].forEach(filter =>
+    })
+    this.filters = [...this.locations.filters(), ...this.interests.filters()]
+    this.filters.forEach(filter =>
       this.filtersByFilterId.set(filter.id, filter)
     )
     this.locations.render()
     this.interests.render()
     $(".collapsible").collapsible()
     this.internships.map(each => each.render())
-    this.onFilterChange()
+    deferredUser.promise.then(user => {
+      if (!user) { this.onFilterChange() } // StudentSheet will call onFilterChange when it loads.
+    })
   }
 
   findByNameAndLocation(name: string, location: string): Internship | undefined {
@@ -428,11 +432,13 @@ class StudentSheet {
       range: "Filters"
     })
     const internships: Internships = await deferredInternships.promise
+    internships.filters.forEach(filter => filter.setChecked(false))
     response.result.values.forEach(([filterId, value]) => {
       const checked = stringToBoolean(value)
       const filter = internships.findFilterById(filterId)
       if (filter != null) { filter.setChecked(checked) }
     })
+    internships.onFilterChange()
   }
 
   private async readInternshipsSheet(): Promise<void> {

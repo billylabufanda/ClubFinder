@@ -95,7 +95,7 @@ class FilterSet {
  */
 class Filter {
     constructor(filterSet, name) {
-        this.checked = false;
+        this.checked = true;
         this.filterSet = filterSet;
         this.name = name;
         const safeName = this.name.toLowerCase().replace(/[^a-z0-9 ]+/g, "").trim().replace(/ +/g, "-");
@@ -165,7 +165,7 @@ class Internship {
     // <i class="material-icons ${this.mySelector}-save" title="Unsaved">star_border</i>
     render() {
         return __awaiter(this, void 0, void 0, function* () {
-            $("#InternshipCards").append(`<div class="col s12 m6 l6" id="${this.mySelector}">
+            $("#InternshipCards").append(`<div class="col s12 m6 l6" id="${this.mySelector}" style="display:hidden">
         <div class="card sticky-action z-depth-1">
           <div class="card-image waves-effect waves-block waves-light"> 
             <img class="activator" style="${this.bgStyle()}" />
@@ -237,12 +237,17 @@ class Internships {
             internship.locations.forEach(location => this.locations.addFilter(location));
             internship.interests.forEach(interest => this.interests.addFilter(interest));
         });
-        [...this.locations.filters(), ...this.interests.filters()].forEach(filter => this.filtersByFilterId.set(filter.id, filter));
+        this.filters = [...this.locations.filters(), ...this.interests.filters()];
+        this.filters.forEach(filter => this.filtersByFilterId.set(filter.id, filter));
         this.locations.render();
         this.interests.render();
         $(".collapsible").collapsible();
         this.internships.map(each => each.render());
-        this.onFilterChange();
+        deferredUser.promise.then(user => {
+            if (!user) {
+                this.onFilterChange();
+            } // StudentSheet will call onFilterChange when it loads.
+        });
     }
     findByNameAndLocation(name, location) {
         return this.internships.find(ea => ea.name === name && hasAnyOf(location.split(","), ea.locations));
@@ -342,6 +347,7 @@ class StudentSheet {
                 range: "Filters"
             });
             const internships = yield deferredInternships.promise;
+            internships.filters.forEach(filter => filter.setChecked(false));
             response.result.values.forEach(([filterId, value]) => {
                 const checked = stringToBoolean(value);
                 const filter = internships.findFilterById(filterId);
@@ -349,6 +355,7 @@ class StudentSheet {
                     filter.setChecked(checked);
                 }
             });
+            internships.onFilterChange();
         });
     }
     readInternshipsSheet() {

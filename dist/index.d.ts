@@ -90,6 +90,7 @@ declare class Internships {
     readonly internships: Internship[];
     readonly locations: FilterSet;
     readonly interests: FilterSet;
+    readonly filters: Filter[];
     private readonly filtersByFilterId;
     constructor(dataFeedEntry: any);
     findByNameAndLocation(name: string, location: string): Internship | undefined;
