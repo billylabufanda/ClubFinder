@@ -230,6 +230,7 @@ function hasAnyOf(needles, haystack) {
 class Internships {
     constructor(dataFeedEntry) {
         this.filtersByFilterId = new Map();
+        this.studentSheet = new Deferred();
         this.internships = dataFeedEntry.map(e => new Internship(e));
         this.locations = new FilterSet("locations", () => this.onFilterChange());
         this.interests = new FilterSet("interests", () => this.onFilterChange());
@@ -244,7 +245,14 @@ class Internships {
         $(".collapsible").collapsible();
         this.internships.map(each => each.render());
         deferredUser.promise.then(user => {
-            if (!user) {
+            if (user) {
+                const ss = new StudentSheet();
+                this.studentSheet.resolve(ss);
+                this.loadSavedFilters();
+                this.loadSavedInternships();
+            }
+            else {
+                this.studentSheet.resolve();
                 this.onFilterChange();
             } // StudentSheet will call onFilterChange when it loads.
         });
@@ -264,16 +272,36 @@ class Internships {
         const toHide = this.internships.filter(internship => !toShow.includes(internship));
         toHide.forEach(ea => ea.hide());
     }
+    loadSavedFilters() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const studentSheet = yield this.studentSheet.promise;
+            this.filters.forEach(filter => filter.setChecked(false));
+            const savedFilters = yield studentSheet.savedFilters;
+            [...savedFilters.entries()].forEach(([filterId, checked]) => {
+                const filter = this.findFilterById(filterId);
+                if (filter != null) {
+                    filter.setChecked(checked);
+                }
+            });
+            this.onFilterChange();
+        });
+    }
+    loadSavedInternships() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const studentSheet = yield this.studentSheet.promise;
+            const savedInternships = (yield studentSheet.savedInternships).map(savedInternship => this.findByNameAndLocation(savedInternship.name, savedInternship.location));
+            this.internships.forEach(internship => internship.setSaved(savedInternships.includes(internship)));
+        });
+    }
 }
-const deferredInternships = new Deferred();
 /**
  * Find or Create the Spreadsheet
  */
 class StudentSheet {
     constructor() {
         this.sheetId = this.getSpreadsheetId();
-        this.readInternshipsSheet();
-        this.readFiltersSheet();
+        this.savedInternships = this.readInternshipsSheet();
+        this.savedFilters = this.readFiltersSheet();
     }
     getSpreadsheetId() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -346,16 +374,7 @@ class StudentSheet {
                 spreadsheetId,
                 range: "Filters"
             });
-            const internships = yield deferredInternships.promise;
-            internships.filters.forEach(filter => filter.setChecked(false));
-            response.result.values.forEach(([filterId, value]) => {
-                const checked = stringToBoolean(value);
-                const filter = internships.findFilterById(filterId);
-                if (filter != null) {
-                    filter.setChecked(checked);
-                }
-            });
-            internships.onFilterChange();
+            return new Map(response.result.values.map(([filterId, value]) => [filterId, stringToBoolean(value)]));
         });
     }
     readInternshipsSheet() {
@@ -365,9 +384,9 @@ class StudentSheet {
                 spreadsheetId,
                 range: "Internships!A2:B200"
             });
-            const internships = yield deferredInternships.promise;
-            const savedInternships = response.result.values.map(([name, location]) => internships.findByNameAndLocation(name, location));
-            internships.internships.forEach(internship => internship.setSaved(savedInternships.includes(internship)));
+            return response.result.values.map(([name, location]) => {
+                return { name, location };
+            });
         });
     }
 }
@@ -379,7 +398,7 @@ const studentSheet = new StudentSheet();
 // tslint:disable-next-line:max-line-length
 $.getJSON("https://spreadsheets.google.com/feeds/list/1KiBBwtRUjufhhD5FOwC0b37asXf48Ug1m8zL5WrHCBA/default/public/values?alt=json", function (data) {
     try {
-        deferredInternships.resolve(new Internships(data.feed.entry));
+        new Internships(data.feed.entry);
         console.log("Finished loading internships");
     }
     catch (error) {

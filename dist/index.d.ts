@@ -92,16 +92,24 @@ declare class Internships {
     readonly interests: FilterSet;
     readonly filters: Filter[];
     private readonly filtersByFilterId;
+    private readonly studentSheet;
     constructor(dataFeedEntry: any);
     findByNameAndLocation(name: string, location: string): Internship | undefined;
     findFilterById(filterId: string): Filter | undefined;
     onFilterChange(): void;
+    loadSavedFilters(): Promise<void>;
+    loadSavedInternships(): Promise<void>;
 }
-declare const deferredInternships: Deferred<Internships>;
+interface SavedInternship {
+    name: string;
+    location: string;
+}
 /**
  * Find or Create the Spreadsheet
  */
 declare class StudentSheet {
+    readonly savedFilters: Promise<Map<string, boolean>>;
+    readonly savedInternships: Promise<SavedInternship[]>;
     private readonly sheetId;
     constructor();
     private getSpreadsheetId();

@@ -293,6 +293,7 @@ class Internships {
   readonly interests: FilterSet
   readonly filters: Filter[]
   private readonly filtersByFilterId = new Map<string, Filter>()
+  private readonly studentSheet = new Deferred<StudentSheet>()
   constructor(dataFeedEntry) {
     this.internships = dataFeedEntry.map(e => new Internship(e))
     this.locations = new FilterSet("locations", () => this.onFilterChange())
@@ -310,7 +311,15 @@ class Internships {
     $(".collapsible").collapsible()
     this.internships.map(each => each.render())
     deferredUser.promise.then(user => {
-      if (!user) { this.onFilterChange() } // StudentSheet will call onFilterChange when it loads.
+      if (user) {
+        const ss = new StudentSheet()
+        this.studentSheet.resolve(ss)
+        this.loadSavedFilters()
+        this.loadSavedInternships()
+      } else {
+        this.studentSheet.resolve()
+        this.onFilterChange()
+      } // StudentSheet will call onFilterChange when it loads.
     })
   }
 
@@ -335,19 +344,45 @@ class Internships {
     const toHide = this.internships.filter(internship => !toShow.includes(internship))
     toHide.forEach(ea => ea.hide())
   }
+
+  async loadSavedFilters() {
+    const studentSheet = await this.studentSheet.promise
+    this.filters.forEach(filter => filter.setChecked(false))
+    const savedFilters = await studentSheet.savedFilters;
+    [...savedFilters.entries()].forEach(([filterId, checked]) => {
+      const filter = this.findFilterById(filterId)
+      if (filter != null) { filter.setChecked(checked) }
+    })
+    this.onFilterChange()
+  }
+
+  async loadSavedInternships() {
+    const studentSheet = await this.studentSheet.promise
+    const savedInternships = (await studentSheet.savedInternships).map(savedInternship =>
+      this.findByNameAndLocation(savedInternship.name, savedInternship.location)
+    )
+    this.internships.forEach(internship =>
+      internship.setSaved(savedInternships.includes(internship))
+    )
+  }
 }
 
-const deferredInternships = new Deferred<Internships>()
+interface SavedInternship {
+  name: string
+  location: string
+}
 
 /**
  * Find or Create the Spreadsheet
  */
 class StudentSheet {
+  readonly savedFilters: Promise<Map<string, boolean>>
+  readonly savedInternships: Promise<SavedInternship[]>
   private readonly sheetId: Promise<string | undefined>
   constructor() {
     this.sheetId = this.getSpreadsheetId()
-    this.readInternshipsSheet()
-    this.readFiltersSheet()
+    this.savedInternships = this.readInternshipsSheet()
+    this.savedFilters = this.readFiltersSheet()
   }
 
   private async getSpreadsheetId(): Promise<string | undefined> {
@@ -425,35 +460,27 @@ class StudentSheet {
     return spreadsheetId
   }
 
-  private async readFiltersSheet(): Promise<void> {
+  private async readFiltersSheet(): Promise<Map<string, boolean>> {
     const spreadsheetId = await this.sheetId
     const response = await gapi.client.sheets.spreadsheets.values.get({
       spreadsheetId,
       range: "Filters"
     })
-    const internships: Internships = await deferredInternships.promise
-    internships.filters.forEach(filter => filter.setChecked(false))
-    response.result.values.forEach(([filterId, value]) => {
-      const checked = stringToBoolean(value)
-      const filter = internships.findFilterById(filterId)
-      if (filter != null) { filter.setChecked(checked) }
-    })
-    internships.onFilterChange()
+
+    return new Map<string, boolean>(
+      response.result.values.map(([filterId, value]) => [filterId, stringToBoolean(value)])
+    )
   }
 
-  private async readInternshipsSheet(): Promise<void> {
+  private async readInternshipsSheet(): Promise<SavedInternship[]> {
     const spreadsheetId = await this.sheetId
     const response = await gapi.client.sheets.spreadsheets.values.get({
       spreadsheetId,
       range: "Internships!A2:B200"
     })
-    const internships: Internships = await deferredInternships.promise
-    const savedInternships = response.result.values.map(([name, location]) =>
-      internships.findByNameAndLocation(name, location)
-    )
-    internships.internships.forEach(internship =>
-      internship.setSaved(savedInternships.includes(internship))
-    )
+    return response.result.values.map(([name, location]) => {
+      return { name, location }
+    })
   }
 }
 
@@ -467,7 +494,7 @@ const studentSheet = new StudentSheet()
 // tslint:disable-next-line:max-line-length
 $.getJSON("https://spreadsheets.google.com/feeds/list/1KiBBwtRUjufhhD5FOwC0b37asXf48Ug1m8zL5WrHCBA/default/public/values?alt=json", function (data) {
   try {
-    deferredInternships.resolve(new Internships(data.feed.entry))
+    new Internships(data.feed.entry)
     console.log("Finished loading internships")
   } catch (error) {
     alert("Couldn't load available internships. Sorry.")
