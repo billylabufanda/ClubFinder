@@ -271,6 +271,7 @@ class Internships {
         toShow.forEach(ea => ea.show());
         const toHide = this.internships.filter(internship => !toShow.includes(internship));
         toHide.forEach(ea => ea.hide());
+        this.saveFilters();
     }
     loadSavedFilters() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -293,6 +294,15 @@ class Internships {
             this.internships.forEach(internship => internship.setSaved(savedInternships.includes(internship)));
         });
     }
+    saveFilters() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const studentSheet = yield this.studentSheet.promise;
+            if (studentSheet) {
+                const filters = new Map(this.filters.map(filter => [filter.id, filter.getChecked()]));
+                return studentSheet.writeFiltersSheet(filters);
+            }
+        });
+    }
 }
 /**
  * Find or Create the Spreadsheet
@@ -302,6 +312,30 @@ class StudentSheet {
         this.sheetId = this.getSpreadsheetId();
         this.savedInternships = this.readInternshipsSheet();
         this.savedFilters = this.readFiltersSheet();
+    }
+    writeFiltersSheet(filters) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const spreadsheetId = yield this.sheetId;
+            const values = [...filters.entries()].sort();
+            const response = yield gapi.client.sheets.spreadsheets.values.update({
+                spreadsheetId,
+                valueInputOption: "RAW",
+                range: "Filters!A1:B300",
+                values
+            });
+        });
+    }
+    writeInternshipsSheet(savedInternships) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const spreadsheetId = yield this.sheetId;
+            const values = [...savedInternships.entries()].sort();
+            const response = yield gapi.client.sheets.spreadsheets.values.update({
+                spreadsheetId,
+                valueInputOption: "RAW",
+                range: "Internships!A1:B200",
+                values
+            });
+        });
     }
     getSpreadsheetId() {
         return __awaiter(this, void 0, void 0, function* () {

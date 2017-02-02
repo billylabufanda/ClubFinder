@@ -70,7 +70,7 @@ class FilterSet {
   readonly filterClickListener: () => void
   private readonly filterNameToFilter: Map<string, Filter>
 
-  constructor(name, filterClickListener) {
+  constructor(name: string, filterClickListener: () => void) {
     this.name = name
     this.filterNameToFilter = new Map() // "San Jose" => new Filter("San Jose")
     this.id = name + "Filters"
@@ -122,7 +122,7 @@ class Filter {
   readonly name: string
   private readonly filterSet: FilterSet
   private checked: boolean = true
-  constructor(filterSet, name) {
+  constructor(filterSet: FilterSet, name: string) {
     this.filterSet = filterSet
     this.name = name
     const safeName = this.name.toLowerCase().replace(/[^a-z0-9 ]+/g, "").trim().replace(/ +/g, "-")
@@ -336,13 +336,14 @@ class Internships {
   onFilterChange() {
     const selectedLocations = this.locations.selectedFilterNames()
     const selectedInterests = this.interests.selectedFilterNames()
-    const toShow = this.internships.filter(internship =>
+    const toShow: Internship[] = this.internships.filter(internship =>
       hasAnyOf(internship.locations, selectedLocations) &&
       hasAnyOf(internship.interests, selectedInterests)
     )
     toShow.forEach(ea => ea.show())
-    const toHide = this.internships.filter(internship => !toShow.includes(internship))
+    const toHide: Internship[] = this.internships.filter(internship => !toShow.includes(internship))
     toHide.forEach(ea => ea.hide())
+    this.saveFilters()
   }
 
   async loadSavedFilters() {
@@ -365,6 +366,16 @@ class Internships {
       internship.setSaved(savedInternships.includes(internship))
     )
   }
+
+  async saveFilters() {
+    const studentSheet = await this.studentSheet.promise
+    if (studentSheet) {
+      const filters = new Map(this.filters.map(filter =>
+        [filter.id, filter.getChecked()] as [string, boolean])
+      )
+      return studentSheet.writeFiltersSheet(filters)
+    }
+  }
 }
 
 interface SavedInternship {
@@ -383,6 +394,28 @@ class StudentSheet {
     this.sheetId = this.getSpreadsheetId()
     this.savedInternships = this.readInternshipsSheet()
     this.savedFilters = this.readFiltersSheet()
+  }
+
+  async writeFiltersSheet(filters: Map<string, boolean>): Promise<void> {
+    const spreadsheetId = await this.sheetId
+    const values = [...filters.entries()].sort()
+    const response = await gapi.client.sheets.spreadsheets.values.update({
+      spreadsheetId,
+      valueInputOption: "RAW",
+      range: "Filters!A1:B300",
+      values
+    })
+  }
+
+  async writeInternshipsSheet(savedInternships: Internship[]): Promise<void> {
+    const spreadsheetId = await this.sheetId
+    const values = [...savedInternships.entries()].sort()
+    const response = await gapi.client.sheets.spreadsheets.values.update({
+      spreadsheetId,
+      valueInputOption: "RAW",
+      range: "Internships!A1:B200",
+      values
+    })
   }
 
   private async getSpreadsheetId(): Promise<string | undefined> {

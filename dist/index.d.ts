@@ -26,7 +26,7 @@ declare class FilterSet {
     readonly id: string;
     readonly filterClickListener: () => void;
     private readonly filterNameToFilter;
-    constructor(name: any, filterClickListener: any);
+    constructor(name: string, filterClickListener: () => void);
     filterNames(): string[];
     filters(): Filter[];
     addFilter(filterName: any): void;
@@ -47,7 +47,7 @@ declare class Filter {
     readonly name: string;
     private readonly filterSet;
     private checked;
-    constructor(filterSet: any, name: any);
+    constructor(filterSet: FilterSet, name: string);
     getChecked(): boolean;
     setChecked(newCheckedState: boolean): void;
     render(): void;
@@ -99,6 +99,7 @@ declare class Internships {
     onFilterChange(): void;
     loadSavedFilters(): Promise<void>;
     loadSavedInternships(): Promise<void>;
+    saveFilters(): Promise<void>;
 }
 interface SavedInternship {
     name: string;
@@ -112,6 +113,8 @@ declare class StudentSheet {
     readonly savedInternships: Promise<SavedInternship[]>;
     private readonly sheetId;
     constructor();
+    writeFiltersSheet(filters: Map<string, boolean>): Promise<void>;
+    writeInternshipsSheet(savedInternships: Internship[]): Promise<void>;
     private getSpreadsheetId();
     private readFiltersSheet();
     private readInternshipsSheet();
