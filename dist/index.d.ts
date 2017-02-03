@@ -20,6 +20,7 @@ interface User {
 declare const deferredUser: Deferred<User>;
 declare const gapi: any;
 declare const $: any;
+declare const Materialize: any;
 /**
  * Load Sheets API client library.
  */
@@ -140,3 +141,4 @@ declare const SCOPES = "email profile https://www.googleapis.com/auth/spreadshee
 declare function handleClientLoad(): void;
 declare function updateSigninStatus(isSignedIn: any, onStartup?: boolean): void;
 declare function handleSignInClick(event: any): void;
+declare function handleSignOutClick(event: any): Promise<void>;

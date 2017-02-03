@@ -389,51 +389,61 @@ class StudentSheet {
     }
     writeFiltersSheet(filters, sheetId) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("Saving checked filters " + [...filters.entries()].filter(([n, b]) => b).map(([n]) => n));
-            const spreadsheetId = sheetId || (yield this.sheetId);
-            const values = [...filters.entries()].map(([name, checked]) => [name, "" + checked]).sort();
-            while (values.length < StudentSheet.maxValues) {
-                values.push(["", ""]);
+            try {
+                console.log("Saving checked filters " + [...filters.entries()].filter(([n, b]) => b).map(([n]) => n));
+                const spreadsheetId = sheetId || (yield this.sheetId);
+                const values = [...filters.entries()].map(([name, checked]) => [name, "" + checked]).sort();
+                while (values.length < StudentSheet.maxValues) {
+                    values.push(["", ""]);
+                }
+                const response = yield gapi.client.sheets.spreadsheets.values.update({
+                    spreadsheetId,
+                    valueInputOption: "RAW",
+                    range: "Filters!A1:B" + StudentSheet.maxValues,
+                    values
+                });
             }
-            const response = yield gapi.client.sheets.spreadsheets.values.update({
-                spreadsheetId,
-                valueInputOption: "RAW",
-                range: "Filters!A1:B" + StudentSheet.maxValues,
-                values
-            });
+            catch (error) {
+                Materialize.toast("Oops. Saving your filters failed: " + error, 4000); // 4000 is the duration of the toast
+            }
         });
     }
     writeInternshipsSheet(savedInternships) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("Saving internships " + savedInternships.map(i => i.name));
-            const spreadsheetId = yield this.sheetId;
-            const header = [
-                "Name of Company",
-                "Location",
-                "Field of Interest",
-                "Job Description",
-                "Number of Students",
-                "Contact Information",
-                "Type of Work"
-            ];
-            const values = [header, ...savedInternships.map(i => [
-                    i.name,
-                    i.locations.join(", "),
-                    i.interests.join(", "),
-                    i.jobDescription,
-                    i.numberOfStudents,
-                    i.contactInfo,
-                    i.typeOfWork
-                ])];
-            while (values.length < StudentSheet.maxValues) {
-                values.push(["", "", "", "", "", "", ""]);
+            try {
+                console.log("Saving internships " + savedInternships.map(i => i.name));
+                const spreadsheetId = yield this.sheetId;
+                const header = [
+                    "Name of Company",
+                    "Location",
+                    "Field of Interest",
+                    "Job Description",
+                    "Number of Students",
+                    "Contact Information",
+                    "Type of Work"
+                ];
+                const values = [header, ...savedInternships.map(i => [
+                        i.name,
+                        i.locations.join(", "),
+                        i.interests.join(", "),
+                        i.jobDescription,
+                        i.numberOfStudents,
+                        i.contactInfo,
+                        i.typeOfWork
+                    ])];
+                while (values.length < StudentSheet.maxValues) {
+                    values.push(["", "", "", "", "", "", ""]);
+                }
+                const response = yield gapi.client.sheets.spreadsheets.values.update({
+                    spreadsheetId,
+                    valueInputOption: "RAW",
+                    range: "Internships!A1:G" + StudentSheet.maxValues,
+                    values
+                });
             }
-            const response = yield gapi.client.sheets.spreadsheets.values.update({
-                spreadsheetId,
-                valueInputOption: "RAW",
-                range: "Internships!A1:G" + StudentSheet.maxValues,
-                values
-            });
+            catch (error) {
+                Materialize.toast("Oops. Saving your internships failed: " + error, 4000); // 4000 is the duration of the toast
+            }
         });
     }
     getSpreadsheetId() {
@@ -580,7 +590,11 @@ function updateSigninStatus(isSignedIn, onStartup = false) {
         else {
             let profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile();
             console.log("Student email: " + profile.getEmail());
-            $("#sign-in-button").text("Signed in").removeAttr("onclick");
+            $("#sign-in-button")
+                .text("Signed in")
+                .removeAttr("onclick")
+                .attr("onclick", "handleSignOutClick()")
+                .attr("title", "Click to sign out");
             deferredUser.resolve(profile);
         }
     }
@@ -590,6 +604,12 @@ function updateSigninStatus(isSignedIn, onStartup = false) {
 }
 function handleSignInClick(event) {
     gapi.auth2.getAuthInstance().signIn();
+}
+function handleSignOutClick(event) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield gapi.auth2.getAuthInstance().signOut();
+        location.reload();
+    });
 }
 $(document).ready(function () {
     $(".button-collapse").sideNav();
