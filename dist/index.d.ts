@@ -36,6 +36,7 @@ declare class FilterSet {
      */
     setFilterChecked(filterName: any, isChecked: any): void;
     render(): void;
+    setAllFilters(checked: boolean): void;
     selectedFilterNames(): string[];
     unselectedFilterNames(): string[];
 }

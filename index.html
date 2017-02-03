@@ -1,21 +1,21 @@
 <html>
 
-  <head>
-    <title>Shasta Internships</title>
-    <link rel="stylesheet" type="text/css" href="/css/index.css">
-    <link rel="stylesheet" type="text/css" href="/css/materialize.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  </head>
+<head>
+  <title>Shasta Internships</title>
+  <link rel="stylesheet" type="text/css" href="/css/index.css">
+  <link rel="stylesheet" type="text/css" href="/css/materialize.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
 
-  <body>
-    <nav class="indigo darken-1" role="navigation">
-      <div class="container">
-        <div class="brand-logo">Tindernship</div>
-        <ul class="right hide-on-small-only">
-          <li>
-            <a id="sign-in-button" class="waves-effect waves-indigo btn indigo accent-3" onclick="handleSignInClick()">
-              <span class="goog">
+<body>
+  <nav class="indigo darken-1" role="navigation">
+    <div class="container">
+      <div class="brand-logo">Tindernship</div>
+      <ul class="right hide-on-small-only">
+        <li>
+          <a id="sign-in-button" class="waves-effect waves-indigo btn indigo accent-3" onclick="handleSignInClick()">
+            <span class="goog">
               <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 48 48" class="left">
                 <g>
                   <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
@@ -26,52 +26,58 @@
                 </g>
               </svg>
             </span> Sign in to Google
-            </a>
+          </a>
+        </li>
+        <li id="saved-internship-link">
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <div class="container">
+    <!--Internship Filters -->
+    <div class="row">
+      <div class="col s12">
+        <ul id="filters" class="collapsible" data-collapsible="accordion">
+          <li id="locations">
+            <div class="collapsible-header"><i class="material-icons">location_on</i>Locations</div>
+            <div class="collapsible-body">
+              <div class="row" id="locationsFilters"></div>
+              <div class="divider"></div>
+              <a class="waves-effect waves-light btn-flat select-all">Select All</a>
+              <a class="waves-effect waves-light btn-flat select-none">Select None</a>
+            </div>
           </li>
-          <li id="saved-internship-link">
+          <li id="interests">
+            <div class="collapsible-header"><i class="material-icons">favorite</i>Interests</div>
+            <div class="collapsible-body">
+              <div class="row" id="interestsFilters"></div>
+              <div class="divider"></div>
+              <a class="waves-effect waves-light btn-flat select-all">Select All</a>
+              <a class="waves-effect waves-light btn-flat select-none">Select None</a>
+            </div>
           </li>
         </ul>
       </div>
-    </nav>
+    </div>
+    <!--Internship Cards -->
+    <div id="InternshipCards" class="row">
+    </div>
+  </div>
+  <footer class="page-footer indigo darken-3">
     <div class="container">
-      <!--Internship Filters -->
       <div class="row">
         <div class="col s12">
-          <ul id="filters" class="collapsible" data-collapsible="accordion">
-            <li>
-              <div class="collapsible-header"><i class="material-icons">location_on</i>Locations</div>
-              <div class="collapsible-body">
-                <div class="row" id="locationsFilters"></div>
-              </div>
-            </li>
-            <li>
-              <div class="collapsible-header"><i class="material-icons">favorite</i>Interests</div>
-              <div class="collapsible-body">
-                <div class="row" id="interestsFilters"></div>
-              </div>
-            </li>
-          </ul>
+          <p class="white-text center">Made By William McEachen</p>
         </div>
-      </div>
-      <!--Internship Cards -->
-      <div id="InternshipCards" class="row">
       </div>
     </div>
-    <footer class="page-footer indigo darken-3">
-      <div class="container">
-        <div class="row">
-          <div class="col s12">
-            <p class="white-text center">Made By William McEachen</p>
-          </div>
-        </div>
-      </div>
-    </footer>
-    <script src="/js/jquery-3.1.1.min.js"></script>
-    <script src="/js/materialize.js"></script>
-    <script src="/dist/index.js"></script>
-    <script async defer src="https://apis.google.com/js/api.js" onload="this.onload=function(){};handleClientLoad()" onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
-    <!--<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVE4YYgpUF8Kc0gTm_DGEd81zsP4i6P10
+  </footer>
+  <script src="/js/jquery-3.1.1.min.js"></script>
+  <script src="/js/materialize.js"></script>
+  <script src="/dist/index.js"></script>
+  <script async defer src="https://apis.google.com/js/api.js" onload="this.onload=function(){};handleClientLoad()" onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
+  <!--<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVE4YYgpUF8Kc0gTm_DGEd81zsP4i6P10
 &callback=geoLocationFilter"></script>-->
-  </body>
+</body>
 
 </html>

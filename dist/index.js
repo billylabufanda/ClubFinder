@@ -82,6 +82,16 @@ class FilterSet {
         this.filterNames().forEach(filterName => {
             this.filterNameToFilter.get(filterName).render();
         });
+        $("#" + this.name + " .select-all").click(() => {
+            this.setAllFilters(true);
+        });
+        $("#" + this.name + " .select-none").click(() => {
+            this.setAllFilters(false);
+        });
+    }
+    setAllFilters(checked) {
+        this.filters().forEach(filter => filter.setChecked(checked));
+        this.filterClickListener();
     }
     selectedFilterNames() {
         return this.filters().filter(ea => ea.getChecked()).map(ea => ea.name);
@@ -181,11 +191,13 @@ class Internship {
             <i class="material-icons right">close</i>
             <span class="card-title">${this.name}</span>
             <p>${this.jobDescription}</p>
-            <p><i class="tiny material-icons">location_on</i> ${this.locations.join(", ")}</p>
-            <p><i class="tiny material-icons">contact_phone</i> ${this.contactInfo}</p>
-            <p><i class="tiny material-icons">favorite</i> ${this.interests.join(", ")}</p>
-            <p><i class="tiny material-icons">work</i> ${this.typeOfWork}</p>
-            <p><i class="tiny material-icons">people</i> ${this.numberOfStudents}</p>
+            <p><i title="Locations" class="tiny material-icons">location_on</i> ${this.locations.join(", ")}</p>
+            <p><i title="Contact Info" class="tiny material-icons">contact_phone</i> ${this.contactInfo}</p>
+            <p><i title="Interests" class="tiny material-icons">favorite</i> ${this.interests.join(", ")}</p>
+            <p><i title="Work Involved" class="tiny material-icons">work</i> ${this.typeOfWork}</p>
+            <p><i
+              title="How many students can fill position"
+              class="tiny material-icons">people</i> ${this.numberOfStudents}</p>
           </div>
           <div class="card-action">
             <div class="save progress">
