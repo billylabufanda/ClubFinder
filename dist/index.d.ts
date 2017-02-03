@@ -62,9 +62,6 @@ declare class Filter {
     setCount(count: number): void;
     render(): void;
 }
-declare const blankImages: string[];
-declare function getRandomInt(min: any, max: any): any;
-declare function randomBlankImage(): string;
 declare function splitAndTrim(s: any): any;
 declare let internshipCounter: number;
 declare class Internship {

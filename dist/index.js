@@ -156,21 +156,6 @@ class Filter {
         });
     }
 }
-const blankImages = [
-    "/images/intern1.jpg",
-    "/images/intern2.jpg",
-    "/images/intern3.jpg",
-    "/images/intern4.jpg",
-    "/images/intern5.jpg"
-];
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min;
-}
-function randomBlankImage() {
-    return blankImages[getRandomInt(0, blankImages.length)];
-}
 function splitAndTrim(s) {
     return s.split(",").map(ea => ea.trim());
 }
