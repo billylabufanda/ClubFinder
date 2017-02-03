@@ -281,7 +281,8 @@ class Internships {
     loadSavedFilters() {
         return __awaiter(this, void 0, void 0, function* () {
             const studentSheet = yield this.studentSheet.promise;
-            this.filters.forEach(filter => filter.setChecked(false));
+            // Leave the interests all checked, and the locations unchecked.
+            this.locations.filters().forEach(f => f.setChecked(false));
             const savedFilters = yield studentSheet.savedFilters;
             [...savedFilters.entries()].forEach(([filterId, checked]) => {
                 const filter = this.findFilterById(filterId);
@@ -326,9 +327,10 @@ class StudentSheet {
         this.savedInternships = this.readInternshipsSheet();
         this.savedFilters = this.readFiltersSheet();
     }
-    writeFiltersSheet(filters) {
+    writeFiltersSheet(filters, sheetId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const spreadsheetId = yield this.sheetId;
+            console.log("Saving checked filters " + [...filters.entries()].filter(([n, b]) => b).map(([n]) => n));
+            const spreadsheetId = sheetId || (yield this.sheetId);
             const values = [...filters.entries()].map(([name, checked]) => [name, "" + checked]).sort();
             while (values.length < StudentSheet.maxValues) {
                 values.push(["", ""]);
@@ -343,6 +345,7 @@ class StudentSheet {
     }
     writeInternshipsSheet(savedInternships) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log("Saving internships " + savedInternships.map(i => i.name));
             const spreadsheetId = yield this.sheetId;
             const header = [
                 "Name of Company",
@@ -379,13 +382,13 @@ class StudentSheet {
             if (user == null) {
                 return;
             }
+            console.log("OMG I AM GETTING A SHEET ID NOW for " + user.getEmail());
             // Does the sheet exist already?
-            const deferredFiles = new Deferred();
-            gapi.client.drive.files.list({
+            const listResponse = yield gapi.client.drive.files.list({
                 pageSize: 1,
-                q: `properties has { key='InternshipsFor' and value='${(yield user).getEmail()}'}`
-            }).execute(result => deferredFiles.resolve(result.files));
-            const files = yield deferredFiles.promise;
+                q: `properties has { key='InternshipsFor' and value='${user.getEmail()}'}`
+            });
+            const files = listResponse.result.files;
             if (files && files.length === 1 && files[0].id) {
                 const spreadsheetId = files[0].id;
                 console.log("Found prior Sheet " + spreadsheetId);
@@ -394,7 +397,7 @@ class StudentSheet {
             // Darn, we have to create it:
             const response = yield gapi.client.sheets.spreadsheets.create({
                 "properties": {
-                    "title": `Saved Internships for ${(yield user).getName()}`
+                    "title": `Saved Internships for ${user.getName()}`
                 }
             });
             const spreadsheetId = response.result.spreadsheetId;
@@ -402,7 +405,7 @@ class StudentSheet {
             const driveUpdateResponse = yield gapi.client.drive.files.update({
                 fileId: spreadsheetId,
                 properties: {
-                    InternshipsFor: (yield user).getEmail()
+                    InternshipsFor: user.getEmail()
                 }
             });
             console.log("Yay got drive update response " + JSON.stringify(driveUpdateResponse));
@@ -434,27 +437,36 @@ class StudentSheet {
             };
             const batchUpdateResponse = yield gapi.client.sheets.spreadsheets.batchUpdate(request);
             console.log("Got batch update response: " + JSON.stringify(batchUpdateResponse));
+            // Save default filter values. TODO replace with Geo browser lookup!
+            this.writeFiltersSheet(new Map([
+                "filter-locations-burlingame",
+                "filter-locations-san-carlos",
+                "filter-locations-san-francisco",
+                "filter-locations-san-mateo"
+            ].map(filterId => [filterId, true])), spreadsheetId);
             return spreadsheetId;
         });
     }
     readFiltersSheet() {
         return __awaiter(this, void 0, void 0, function* () {
             const spreadsheetId = yield this.sheetId;
+            console.log("Reading filters from " + spreadsheetId);
             const response = yield gapi.client.sheets.spreadsheets.values.get({
                 spreadsheetId,
                 range: "Filters"
             });
-            return new Map(response.result.values.map(([filterId, value]) => [filterId, stringToBoolean(value)]));
+            return new Map((response.result.values || []).map(([filterId, value]) => [filterId, stringToBoolean(value)]));
         });
     }
     readInternshipsSheet() {
         return __awaiter(this, void 0, void 0, function* () {
             const spreadsheetId = yield this.sheetId;
+            console.log("Reading internships from " + spreadsheetId);
             const response = yield gapi.client.sheets.spreadsheets.values.get({
                 spreadsheetId,
                 range: "Internships!A2:B" + StudentSheet.maxValues
             });
-            return response.result.values.map(([name, location]) => {
+            return (response.result.values || []).map(([name, location]) => {
                 return { name, location };
             });
         });
@@ -464,7 +476,6 @@ StudentSheet.maxValues = 300; // no more than maxValues of filters or saved inte
 function stringToBoolean(s) {
     return ["true", "yes", "t", "y"].includes(s && s.toLowerCase());
 }
-const studentSheet = new StudentSheet();
 // Create Internships Array from Sheet
 // tslint:disable-next-line:max-line-length
 $.getJSON("https://spreadsheets.google.com/feeds/list/1KiBBwtRUjufhhD5FOwC0b37asXf48Ug1m8zL5WrHCBA/default/public/values?alt=json", function (data) {
@@ -487,8 +498,8 @@ function handleClientLoad() {
         gapi.client.init({
             apiKey: "AIzaSyBVE4YYgpUF8Kc0gTm_DGEd81zsP4i6P10",
             discoveryDocs: [
-                "https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest",
-                "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"
+                "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest",
+                "https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest"
             ],
             clientId: "246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com",
             scope: "email profile"

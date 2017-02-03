@@ -117,14 +117,13 @@ declare class StudentSheet {
     readonly savedInternships: Promise<SavedInternship[]>;
     private readonly sheetId;
     constructor();
-    writeFiltersSheet(filters: Map<string, boolean>): Promise<void>;
+    writeFiltersSheet(filters: Map<string, boolean>, sheetId?: string): Promise<void>;
     writeInternshipsSheet(savedInternships: Internship[]): Promise<void>;
     private getSpreadsheetId();
     private readFiltersSheet();
     private readInternshipsSheet();
 }
 declare function stringToBoolean(s: string): boolean;
-declare const studentSheet: StudentSheet;
 declare function geoLocationFilter(): boolean;
 declare const CLIENT_ID = "246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com";
 declare const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive";

@@ -345,7 +345,8 @@ class Internships {
 
   async loadSavedFilters() {
     const studentSheet = await this.studentSheet.promise
-    this.filters.forEach(filter => filter.setChecked(false))
+    // Leave the interests all checked, and the locations unchecked.
+    this.locations.filters().forEach(f => f.setChecked(false))
     const savedFilters = await studentSheet.savedFilters;
     [...savedFilters.entries()].forEach(([filterId, checked]) => {
       const filter = this.findFilterById(filterId)
@@ -402,8 +403,10 @@ class StudentSheet {
     this.savedFilters = this.readFiltersSheet()
   }
 
-  async writeFiltersSheet(filters: Map<string, boolean>): Promise<void> {
-    const spreadsheetId = await this.sheetId
+  async writeFiltersSheet(filters: Map<string, boolean>, sheetId?: string): Promise<void> {
+    console.log("Saving checked filters " + [...filters.entries()].filter(([n, b]) => b).map(([n]) => n))
+
+    const spreadsheetId = sheetId || await this.sheetId
     const values = [...filters.entries()].map(([name, checked]) => [name, "" + checked]).sort()
     while (values.length < StudentSheet.maxValues) {
       values.push(["", ""])
@@ -417,6 +420,7 @@ class StudentSheet {
   }
 
   async writeInternshipsSheet(savedInternships: Internship[]): Promise<void> {
+    console.log("Saving internships " + savedInternships.map(i => i.name))
     const spreadsheetId = await this.sheetId
     const header = [
       "Name of Company",
@@ -457,14 +461,15 @@ class StudentSheet {
       return
     }
 
-    // Does the sheet exist already?
-    const deferredFiles = new Deferred<any[]>()
-    gapi.client.drive.files.list({
-      pageSize: 1,
-      q: `properties has { key='InternshipsFor' and value='${(await user).getEmail()}'}`
-    }).execute(result => deferredFiles.resolve(result.files))
+    console.log("OMG I AM GETTING A SHEET ID NOW for " + user.getEmail())
 
-    const files = await deferredFiles.promise
+    // Does the sheet exist already?
+    const listResponse = await gapi.client.drive.files.list({
+      pageSize: 1,
+      q: `properties has { key='InternshipsFor' and value='${user.getEmail()}'}`
+    })
+
+    const files = listResponse.result.files
 
     if (files && files.length === 1 && files[0].id) {
       const spreadsheetId = files[0].id
@@ -476,7 +481,7 @@ class StudentSheet {
 
     const response = await gapi.client.sheets.spreadsheets.create({
       "properties": {
-        "title": `Saved Internships for ${(await user).getName()}`
+        "title": `Saved Internships for ${user.getName()}`
       }
     })
 
@@ -487,7 +492,7 @@ class StudentSheet {
     const driveUpdateResponse = await gapi.client.drive.files.update({
       fileId: spreadsheetId,
       properties: {
-        InternshipsFor: (await user).getEmail()
+        InternshipsFor: user.getEmail()
       }
     })
 
@@ -523,28 +528,40 @@ class StudentSheet {
     }
     const batchUpdateResponse = await gapi.client.sheets.spreadsheets.batchUpdate(request)
     console.log("Got batch update response: " + JSON.stringify(batchUpdateResponse))
+
+    // Save default filter values. TODO replace with Geo browser lookup!
+    this.writeFiltersSheet(
+      new Map([
+        "filter-locations-burlingame",
+        "filter-locations-san-carlos",
+        "filter-locations-san-francisco",
+        "filter-locations-san-mateo"
+      ].map(filterId => [filterId, true] as [string, boolean])),
+      spreadsheetId
+    )
     return spreadsheetId
   }
 
   private async readFiltersSheet(): Promise<Map<string, boolean>> {
     const spreadsheetId = await this.sheetId
+    console.log("Reading filters from " + spreadsheetId)
     const response = await gapi.client.sheets.spreadsheets.values.get({
       spreadsheetId,
       range: "Filters"
     })
-
     return new Map<string, boolean>(
-      response.result.values.map(([filterId, value]) => [filterId, stringToBoolean(value)])
+      (response.result.values || []).map(([filterId, value]) => [filterId, stringToBoolean(value)])
     )
   }
 
   private async readInternshipsSheet(): Promise<SavedInternship[]> {
     const spreadsheetId = await this.sheetId
+    console.log("Reading internships from " + spreadsheetId)
     const response = await gapi.client.sheets.spreadsheets.values.get({
       spreadsheetId,
       range: "Internships!A2:B" + StudentSheet.maxValues
     })
-    return response.result.values.map(([name, location]) => {
+    return (response.result.values || []).map(([name, location]) => {
       return { name, location }
     })
   }
@@ -553,8 +570,6 @@ class StudentSheet {
 function stringToBoolean(s: string): boolean {
   return ["true", "yes", "t", "y"].includes(s && s.toLowerCase())
 }
-
-const studentSheet = new StudentSheet()
 
 // Create Internships Array from Sheet
 // tslint:disable-next-line:max-line-length
@@ -580,8 +595,8 @@ function handleClientLoad() {
     gapi.client.init({
       apiKey: "AIzaSyBVE4YYgpUF8Kc0gTm_DGEd81zsP4i6P10",
       discoveryDocs: [
-        "https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest",
-        "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"
+        "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest",
+        "https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest"
       ],
       clientId: "246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com",
       scope: "email profile"
