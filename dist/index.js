@@ -177,7 +177,7 @@ class Internship {
     render() {
         return __awaiter(this, void 0, void 0, function* () {
             $("#InternshipCards").append(`<div class="col s12 m6 l6" id="${this.mySelector}" style="display:hidden">
-        <div class="card sticky-action z-depth-1">
+        <div class="card sticky-action z-depth-1 hoverable">
           <div class="card-image waves-effect waves-block waves-light"> 
             <img class="activator" style="${this.bgStyle()}" />
           </div>
