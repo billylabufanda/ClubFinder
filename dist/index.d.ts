@@ -101,6 +101,7 @@ declare class Internships {
     onFilterChange(): void;
     loadSavedFilters(): Promise<void>;
     loadSavedInternships(): Promise<void>;
+    showSavedSheetLink(): Promise<void>;
     saveFilters(): Promise<void>;
     saveInternships(): Promise<void>;
 }
@@ -113,9 +114,9 @@ interface SavedInternship {
  */
 declare class StudentSheet {
     static readonly maxValues: number;
+    readonly sheetId: Promise<string | undefined>;
     readonly savedFilters: Promise<Map<string, boolean>>;
     readonly savedInternships: Promise<SavedInternship[]>;
-    private readonly sheetId;
     constructor();
     writeFiltersSheet(filters: Map<string, boolean>, sheetId?: string): Promise<void>;
     writeInternshipsSheet(savedInternships: Internship[]): Promise<void>;

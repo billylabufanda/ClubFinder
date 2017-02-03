@@ -57,3 +57,6 @@
   top: 0.15em;
   border-radius: 3em;
 }
+#saved-internship-link{
+  text-decoration: underline;
+}

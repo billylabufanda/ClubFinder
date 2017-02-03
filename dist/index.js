@@ -253,6 +253,7 @@ class Internships {
             if (user) {
                 const ss = new StudentSheet();
                 this.studentSheet.resolve(ss);
+                this.showSavedSheetLink();
                 this.loadSavedFilters();
                 this.loadSavedInternships();
             }
@@ -298,6 +299,15 @@ class Internships {
             const studentSheet = yield this.studentSheet.promise;
             const savedInternships = (yield studentSheet.savedInternships).map(savedInternship => this.findByNameAndLocation(savedInternship.name, savedInternship.location));
             this.internships.forEach(internship => internship.setSaved(savedInternships.includes(internship)));
+        });
+    }
+    showSavedSheetLink() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const ss = yield this.studentSheet.promise;
+            if (ss) {
+                const sheetId = yield ss.sheetId;
+                $("#saved-internship-link").append(`<a target="_blank" href="https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=0">Saved Internships</a>`);
+            }
         });
     }
     saveFilters() {
@@ -380,6 +390,7 @@ class StudentSheet {
         return __awaiter(this, void 0, void 0, function* () {
             const user = yield deferredUser.promise;
             if (user == null) {
+                console.log("No user, so no student sheet");
                 return;
             }
             console.log("OMG I AM GETTING A SHEET ID NOW for " + user.getEmail());

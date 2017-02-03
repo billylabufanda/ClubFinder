@@ -311,6 +311,7 @@ class Internships {
       if (user) {
         const ss = new StudentSheet()
         this.studentSheet.resolve(ss)
+        this.showSavedSheetLink()
         this.loadSavedFilters()
         this.loadSavedInternships()
       } else {
@@ -365,6 +366,16 @@ class Internships {
     )
   }
 
+  async showSavedSheetLink() {
+    const ss = await this.studentSheet.promise
+    if (ss) {
+      const sheetId = await ss.sheetId
+      $("#saved-internship-link").append(
+        `<a target="_blank" href="https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=0">Saved Internships</a>`
+      )
+    }
+  }
+
   async saveFilters() {
     const studentSheet = await this.studentSheet.promise
     if (studentSheet) {
@@ -394,9 +405,9 @@ interface SavedInternship {
  */
 class StudentSheet {
   static readonly maxValues = 300 // no more than maxValues of filters or saved internships
+  readonly sheetId: Promise<string | undefined>
   readonly savedFilters: Promise<Map<string, boolean>>
   readonly savedInternships: Promise<SavedInternship[]>
-  private readonly sheetId: Promise<string | undefined>
   constructor() {
     this.sheetId = this.getSpreadsheetId()
     this.savedInternships = this.readInternshipsSheet()
@@ -458,6 +469,7 @@ class StudentSheet {
   private async getSpreadsheetId(): Promise<string | undefined> {
     const user = await deferredUser.promise
     if (user == null) {
+      console.log("No user, so no student sheet")
       return
     }
 
