@@ -26,6 +26,16 @@ class Deferred<T> {
   }
 }
 
+class Counter {
+  readonly counts = new Map<string, number>()
+  increment(name: string) {
+    this.counts.set(name, 1 + this.get(name))
+  }
+  get(name: string): number {
+    return this.counts.has(name) ? this.counts.get(name) : 0
+  }
+}
+
 interface User {
   getName(): string
   getEmail(): string
@@ -91,11 +101,11 @@ class FilterSet {
    * filterName is the name of a specific filter, like "San Francisco" or "Engineering".
    * newCheckedValue is the current state of the filter checkbox/switch
    */
-  setFilterChecked(filterName, isChecked) {
+  setFilterChecked(filterName, isChecked): void {
     this.filterNameToFilter.get(filterName).setChecked(isChecked)
   }
 
-  render() {
+  render(): void {
     this.filterNames().forEach(filterName => {
       this.filterNameToFilter.get(filterName).render()
     })
@@ -107,17 +117,23 @@ class FilterSet {
     })
   }
 
-  setAllFilters(checked: boolean) {
+  setAllFilters(checked: boolean): void {
     this.filters().forEach(filter => filter.setChecked(checked))
     this.filterClickListener()
   }
 
-  selectedFilterNames() {
+  selectedFilterNames(): string[] {
     return this.filters().filter(ea => ea.getChecked()).map(ea => ea.name)
   }
 
-  unselectedFilterNames() {
+  unselectedFilterNames(): string[] {
     return this.filters().filter(ea => !ea.getChecked()).map(ea => ea.name)
+  }
+
+  calculateCounts(counter: Counter): void {
+    console.log("Calculating counts for " + this.name)
+    console.dir(counter)
+    this.filters().forEach(filter => filter.setCount(counter.get(filter.name)))
   }
 }
 
@@ -141,11 +157,17 @@ class Filter {
     $("#" + this.id).prop("checked", newCheckedState)
   }
 
+  setCount(count: number) {
+    $("#" + this.id).parent().find(".count").text(count)
+  }
+
   render() {
     $("#" + this.filterSet.id).append(
       `<div class="col s4">
          <input type="checkbox" class="filled-in filter" id="${this.id}" ${this.checked ? `checked="checked"` : ""} />
-         <label for="${this.id}">${this.name}</label>
+         <label for="${this.id}">${this.name}
+           (<span class="count">${getRandomInt(1, 14)}</span>)
+         </label>
        </div>`
     )
     $("#" + this.id).click(() => {
@@ -283,10 +305,10 @@ class Internship {
 }
 
 /**
- * @return an array holding only elements found in every element in `arrayOfSets`
+ * @return an array holding only elements found in every array
  */
-function intersect<T>(arrayOfSets: Set<T>[]): T[] {
-  return [...arrayOfSets.pop()].filter(element => arrayOfSets.every(set => set.has(element)))
+function intersect<T>(...array: T[][]): T[] {
+  return array.pop().filter(element => array.every(arr => arr.includes(element)))
 }
 
 function hasAnyOf<T>(needles: T[], haystack: T[]) {
@@ -346,10 +368,27 @@ class Internships {
   onFilterChange() {
     const selectedLocations = this.locations.selectedFilterNames()
     const selectedInterests = this.interests.selectedFilterNames()
-    const toShow: Internship[] = this.internships.filter(internship =>
-      hasAnyOf(internship.locations, selectedLocations) &&
+    const selectedLocationInternships: Internship[] = this.internships.filter(internship =>
+      hasAnyOf(internship.locations, selectedLocations)
+    )
+    const selectedInterestsInternships = this.internships.filter(internship =>
       hasAnyOf(internship.interests, selectedInterests)
     )
+
+    const locationCounter = new Counter()
+    const interestCounter = new Counter()
+    // Given the selected interests, what are the location counts
+    selectedInterestsInternships.forEach(internship => {
+      internship.locations.forEach(location => locationCounter.increment(location))
+    })
+    // Given the selected locations, what are the interest counts
+    selectedLocationInternships.forEach(internship => {
+      internship.interests.forEach(interest => interestCounter.increment(interest))
+    })
+    this.locations.calculateCounts(locationCounter)
+    this.interests.calculateCounts(interestCounter)
+
+    const toShow: Internship[] = intersect(selectedLocationInternships, selectedInterestsInternships)
     toShow.forEach(ea => ea.show())
     const toHide: Internship[] = this.internships.filter(internship => !toShow.includes(internship))
     toHide.forEach(ea => ea.hide())

@@ -8,6 +8,11 @@ declare class Deferred<T> {
     resolve(value?: T): void;
     reject(reason?: any): void;
 }
+declare class Counter {
+    readonly counts: Map<string, number>;
+    increment(name: string): void;
+    get(name: string): number;
+}
 interface User {
     getName(): string;
     getEmail(): string;
@@ -39,6 +44,7 @@ declare class FilterSet {
     setAllFilters(checked: boolean): void;
     selectedFilterNames(): string[];
     unselectedFilterNames(): string[];
+    calculateCounts(counter: Counter): void;
 }
 /**
  * "San Jose" or "Engineering"
@@ -51,6 +57,7 @@ declare class Filter {
     constructor(filterSet: FilterSet, name: string);
     getChecked(): boolean;
     setChecked(newCheckedState: boolean): void;
+    setCount(count: number): void;
     render(): void;
 }
 declare const blankImages: string[];
@@ -82,9 +89,9 @@ declare class Internship {
     saveClicked(): void;
 }
 /**
- * @return an array holding only elements found in every element in `arrayOfSets`
+ * @return an array holding only elements found in every array
  */
-declare function intersect<T>(arrayOfSets: Set<T>[]): T[];
+declare function intersect<T>(...array: T[][]): T[];
 declare function hasAnyOf<T>(needles: T[], haystack: T[]): boolean;
 /**
  * parses the internships and sets up the filtersets

@@ -26,6 +26,17 @@ class Deferred {
         this._reject(reason);
     }
 }
+class Counter {
+    constructor() {
+        this.counts = new Map();
+    }
+    increment(name) {
+        this.counts.set(name, 1 + this.get(name));
+    }
+    get(name) {
+        return this.counts.has(name) ? this.counts.get(name) : 0;
+    }
+}
 const deferredUser = new Deferred();
 /**
  * Load Sheets API client library.
@@ -99,6 +110,11 @@ class FilterSet {
     unselectedFilterNames() {
         return this.filters().filter(ea => !ea.getChecked()).map(ea => ea.name);
     }
+    calculateCounts(counter) {
+        console.log("Calculating counts for " + this.name);
+        console.dir(counter);
+        this.filters().forEach(filter => filter.setCount(counter.get(filter.name)));
+    }
 }
 /**
  * "San Jose" or "Engineering"
@@ -118,10 +134,15 @@ class Filter {
         this.checked = newCheckedState;
         $("#" + this.id).prop("checked", newCheckedState);
     }
+    setCount(count) {
+        $("#" + this.id).parent().find(".count").text(count);
+    }
     render() {
         $("#" + this.filterSet.id).append(`<div class="col s4">
          <input type="checkbox" class="filled-in filter" id="${this.id}" ${this.checked ? `checked="checked"` : ""} />
-         <label for="${this.id}">${this.name}</label>
+         <label for="${this.id}">${this.name}
+           (<span class="count">${getRandomInt(1, 14)}</span>)
+         </label>
        </div>`);
         $("#" + this.id).click(() => {
             this.checked = this.getChecked();
@@ -232,10 +253,10 @@ class Internship {
     }
 }
 /**
- * @return an array holding only elements found in every element in `arrayOfSets`
+ * @return an array holding only elements found in every array
  */
-function intersect(arrayOfSets) {
-    return [...arrayOfSets.pop()].filter(element => arrayOfSets.every(set => set.has(element)));
+function intersect(...array) {
+    return array.pop().filter(element => array.every(arr => arr.includes(element)));
 }
 function hasAnyOf(needles, haystack) {
     return needles.findIndex(needle => haystack.includes(needle)) !== -1;
@@ -283,8 +304,21 @@ class Internships {
     onFilterChange() {
         const selectedLocations = this.locations.selectedFilterNames();
         const selectedInterests = this.interests.selectedFilterNames();
-        const toShow = this.internships.filter(internship => hasAnyOf(internship.locations, selectedLocations) &&
-            hasAnyOf(internship.interests, selectedInterests));
+        const selectedLocationInternships = this.internships.filter(internship => hasAnyOf(internship.locations, selectedLocations));
+        const selectedInterestsInternships = this.internships.filter(internship => hasAnyOf(internship.interests, selectedInterests));
+        const locationCounter = new Counter();
+        const interestCounter = new Counter();
+        // Given the selected interests, what are the location counts
+        selectedInterestsInternships.forEach(internship => {
+            internship.locations.forEach(location => locationCounter.increment(location));
+        });
+        // Given the selected locations, what are the interest counts
+        selectedLocationInternships.forEach(internship => {
+            internship.interests.forEach(interest => interestCounter.increment(interest));
+        });
+        this.locations.calculateCounts(locationCounter);
+        this.interests.calculateCounts(interestCounter);
+        const toShow = intersect(selectedLocationInternships, selectedInterestsInternships);
         toShow.forEach(ea => ea.show());
         const toHide = this.internships.filter(internship => !toShow.includes(internship));
         toHide.forEach(ea => ea.hide());

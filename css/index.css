@@ -57,6 +57,11 @@
   top: 0.15em;
   border-radius: 3em;
 }
-#saved-internship-link{
+
+#saved-internship-link {
   text-decoration: underline;
+}
+
+#filters span.count {
+  color: #333;
 }
