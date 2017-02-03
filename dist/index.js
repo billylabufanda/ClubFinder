@@ -188,8 +188,7 @@ class Internship {
             </span>
           </div>
           <div class="card-reveal">
-            <i class="material-icons right">close</i>
-            <span class="card-title">${this.name}</span>
+            <span class="card-title">${this.name}<i class="material-icons right">close</i></span>
             <p>${this.jobDescription}</p>
             <p><i title="Locations" class="tiny material-icons">location_on</i> ${this.locations.join(", ")}</p>
             <p><i title="Contact Info" class="tiny material-icons">contact_phone</i> ${this.contactInfo}</p>
