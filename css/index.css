@@ -63,5 +63,15 @@
 }
 
 #filters span.count {
-  color: #333;
+  color: #999;
+  border-radius: .3em;
+  background-color: #eee;
+  padding: .3em .5em;
+  font-size: smaller;
+  margin-left: .5em;
+  font-weight: bold;
+}
+
+#filters label {
+  color: #444;
 }

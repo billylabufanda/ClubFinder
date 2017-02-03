@@ -141,7 +141,9 @@ class Filter {
         $("#" + this.filterSet.id).append(`<div class="col s4">
          <input type="checkbox" class="filled-in filter" id="${this.id}" ${this.checked ? `checked="checked"` : ""} />
          <label for="${this.id}">${this.name}
-           (<span class="count">${getRandomInt(1, 14)}</span>)
+           <span
+             class="count"
+             title="Number of ${this.name} internships with current non-${this.filterSet.name} filters">-</span>
          </label>
        </div>`);
         $("#" + this.id).click(() => {
@@ -183,6 +185,7 @@ class Internship {
         this.typeOfWork = entry.gsx$typeofwork.$t;
         this.numberOfStudents = entry.gsx$numberofstudents.$t;
         this.logo = entry.gsx$logo.$t;
+        this.approved = "Approved" === entry.gsx$approval.$t;
     }
     show() {
         $("#" + this.mySelector).fadeIn();
@@ -268,7 +271,9 @@ class Internships {
     constructor(dataFeedEntry) {
         this.filtersByFilterId = new Map();
         this.studentSheet = new Deferred();
-        this.internships = dataFeedEntry.map(e => new Internship(this, e));
+        this.internships = dataFeedEntry
+            .map(e => new Internship(this, e))
+            .filter(internship => internship.approved);
         this.locations = new FilterSet("locations", () => this.onFilterChange());
         this.interests = new FilterSet("interests", () => this.onFilterChange());
         this.internships.forEach(internship => {

@@ -75,6 +75,7 @@ declare class Internship {
     readonly typeOfWork: string;
     readonly numberOfStudents: string;
     readonly logo: string;
+    readonly approved: boolean;
     private readonly id;
     private readonly mySelector;
     private saved;

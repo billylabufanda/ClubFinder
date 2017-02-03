@@ -166,7 +166,9 @@ class Filter {
       `<div class="col s4">
          <input type="checkbox" class="filled-in filter" id="${this.id}" ${this.checked ? `checked="checked"` : ""} />
          <label for="${this.id}">${this.name}
-           (<span class="count">${getRandomInt(1, 14)}</span>)
+           <span
+             class="count"
+             title="Number of ${this.name} internships with current non-${this.filterSet.name} filters">-</span>
          </label>
        </div>`
     )
@@ -209,6 +211,7 @@ class Internship {
   readonly typeOfWork: string
   readonly numberOfStudents: string
   readonly logo: string
+  readonly approved: boolean
   private readonly id: number
   private readonly mySelector: string
   private saved: boolean = false
@@ -224,6 +227,7 @@ class Internship {
     this.typeOfWork = entry.gsx$typeofwork.$t
     this.numberOfStudents = entry.gsx$numberofstudents.$t
     this.logo = entry.gsx$logo.$t
+    this.approved = "Approved" === entry.gsx$approval.$t
   }
 
   show() {
@@ -326,7 +330,9 @@ class Internships {
   private readonly filtersByFilterId = new Map<string, Filter>()
   private readonly studentSheet = new Deferred<StudentSheet>()
   constructor(dataFeedEntry) {
-    this.internships = dataFeedEntry.map(e => new Internship(this, e))
+    this.internships = dataFeedEntry
+      .map(e => new Internship(this, e))
+      .filter(internship => internship.approved)
     this.locations = new FilterSet("locations", () => this.onFilterChange())
     this.interests = new FilterSet("interests", () => this.onFilterChange())
     this.internships.forEach(internship => {
