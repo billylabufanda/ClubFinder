@@ -137,5 +137,5 @@ declare function geoLocationFilter(): boolean;
 declare const CLIENT_ID = "246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com";
 declare const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive";
 declare function handleClientLoad(): void;
-declare function updateSigninStatus(isSignedIn: any): void;
+declare function updateSigninStatus(isSignedIn: any, onStartup?: boolean): void;
 declare function handleSignInClick(event: any): void;

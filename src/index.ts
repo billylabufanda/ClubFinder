@@ -666,18 +666,22 @@ function handleClientLoad() {
     }).then(function () {
       const auth2 = gapi.auth2.getAuthInstance()
       auth2.isSignedIn.listen(updateSigninStatus)
-      updateSigninStatus(auth2.isSignedIn.get())
+      updateSigninStatus(auth2.isSignedIn.get(), true)
     })
   })
 }
 
-function updateSigninStatus(isSignedIn) {
-  console.log("updateSigninStatus: isSignedIn is " + isSignedIn)
+function updateSigninStatus(isSignedIn, onStartup = false) {
+  console.log("updateSigninStatus: isSignedIn is " + isSignedIn + ", onStartup is " + onStartup)
   if (isSignedIn) {
-    let profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile()
-    console.log("Student email: " + profile.getEmail())
-    $("#sign-in-button").text("Signed in").removeAttr("onclick")
-    deferredUser.resolve(profile)
+    if (!onStartup) {
+      location.reload()
+    } else {
+      let profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile()
+      console.log("Student email: " + profile.getEmail())
+      $("#sign-in-button").text("Signed in").removeAttr("onclick")
+      deferredUser.resolve(profile)
+    }
   } else {
     deferredUser.resolve(undefined)
   }
