@@ -21,6 +21,7 @@ declare const deferredUser: Deferred<User>;
 declare const gapi: any;
 declare const $: any;
 declare const Materialize: any;
+declare function handleError(message: string, error: any): void;
 /**
  * Load Sheets API client library.
  */
@@ -139,6 +140,7 @@ declare function geoLocationFilter(): boolean;
 declare const CLIENT_ID = "246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com";
 declare const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive";
 declare function handleClientLoad(): void;
+declare function initAuth(): Promise<void>;
 declare function updateSigninStatus(isSignedIn: any, onStartup?: boolean): void;
 declare function handleSignInClick(event: any): void;
 declare function handleSignOutClick(event: any): Promise<void>;

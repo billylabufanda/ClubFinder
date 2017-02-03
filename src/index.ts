@@ -47,6 +47,11 @@ declare const gapi: any
 declare const $: any
 declare const Materialize: any
 
+function handleError(message: string, error: any): void {
+  Materialize.toast(message)
+  $(".footer").append(JSON.stringify(error))
+}
+
 /**
  * Load Sheets API client library.
  */
@@ -217,18 +222,23 @@ class Internship {
   private readonly mySelector: string
   private saved: boolean = false
 
-  constructor(readonly parent: Internships, entry) {
+  constructor(readonly parent: Internships, entry: any) {
     this.id = ++internshipCounter
     this.mySelector = "Internship" + this.id
-    this.name = entry.gsx$nameofcompany.$t
-    this.locations = splitAndTrim(entry.gsx$location.$t)
-    this.interests = splitAndTrim(entry.gsx$fieldofinterest.$t)
-    this.jobDescription = entry.gsx$jobdescription.$t
-    this.contactInfo = entry.gsx$contactinformation.$t
-    this.typeOfWork = entry.gsx$typeofwork.$t
-    this.numberOfStudents = entry.gsx$numberofstudents.$t
-    this.logo = entry.gsx$logo.$t
-    this.approved = "Approved" === entry.gsx$approval.$t
+    try {
+      this.name = entry.gsx$nameofcompany.$t
+      this.locations = splitAndTrim(entry.gsx$location.$t)
+      this.interests = splitAndTrim(entry.gsx$fieldofinterest.$t)
+      this.jobDescription = entry.gsx$jobdescription.$t
+      this.contactInfo = entry.gsx$contactinformation.$t
+      this.typeOfWork = entry.gsx$typeofwork.$t
+      this.numberOfStudents = entry.gsx$numberofstudents.$t
+      this.logo = entry.gsx$logo.$t
+      this.approved = "Approved" === entry.gsx$approval.$t
+    } catch (error) {
+      handleError("Failed to read internship", { entry, error })
+      this.approved = false
+    }
   }
 
   show() {
@@ -528,120 +538,132 @@ class StudentSheet {
         values
       })
     } catch (error) {
-      Materialize.toast("Oops. Saving your internships failed: " + error, 4000) // 4000 is the duration of the toast
+      handleError("Sorry, couldn't save the internship", error)
     }
   }
 
   private async getSpreadsheetId(): Promise<string | undefined> {
-    const user = await deferredUser.promise
-    if (user == null) {
-      console.log("No user, so no student sheet")
-      return
-    }
-
-    console.log("OMG I AM GETTING A SHEET ID NOW for " + user.getEmail())
-
-    // Does the sheet exist already?
-    const listResponse = await gapi.client.drive.files.list({
-      pageSize: 1,
-      q: `properties has { key='InternshipsFor' and value='${user.getEmail()}'}`
-    })
-
-    const files = listResponse.result.files
-
-    if (files && files.length === 1 && files[0].id) {
-      const spreadsheetId = files[0].id
-      console.log("Found prior Sheet " + spreadsheetId)
-      return spreadsheetId
-    }
-
-    // Darn, we have to create it:
-
-    const response = await gapi.client.sheets.spreadsheets.create({
-      "properties": {
-        "title": `Saved Internships for ${user.getName()}`
+    try {
+      const user = await deferredUser.promise
+      if (user == null) {
+        console.log("No user, so no student sheet")
+        return
       }
-    })
 
-    const spreadsheetId = response.result.spreadsheetId
+      console.log("OMG I AM GETTING A SHEET ID NOW for " + user.getEmail())
 
-    // And set the metadata to find it later
+      // Does the sheet exist already?
+      const listResponse = await gapi.client.drive.files.list({
+        pageSize: 1,
+        q: `properties has { key='InternshipsFor' and value='${user.getEmail()}'}`
+      })
 
-    const driveUpdateResponse = await gapi.client.drive.files.update({
-      fileId: spreadsheetId,
-      properties: {
-        InternshipsFor: user.getEmail()
+      const files = listResponse.result.files
+
+      if (files && files.length === 1 && files[0].id) {
+        const spreadsheetId = files[0].id
+        console.log("Found prior Sheet " + spreadsheetId)
+        return spreadsheetId
       }
-    })
 
-    console.log("Yay got drive update response " + JSON.stringify(driveUpdateResponse))
+      // Darn, we have to create it:
 
-    // Create 3 sheets: one for the saved internships
+      const response = await gapi.client.sheets.spreadsheets.create({
+        "properties": {
+          "title": `Saved Internships for ${user.getName()}`
+        }
+      })
 
-    const renameSavedInternshipRequest = {
-      updateSheetProperties: {
+      const spreadsheetId = response.result.spreadsheetId
+
+      // And set the metadata to find it later
+
+      const driveUpdateResponse = await gapi.client.drive.files.update({
+        fileId: spreadsheetId,
         properties: {
-          title: "Internships",
-          index: 0
-        },
-        fields: "title"
-      }
-    }
-    const addFilterSheetRequest = {
-      addSheet: {
-        properties: {
-          title: "Filters",
-          index: 1
+          InternshipsFor: user.getEmail()
+        }
+      })
+
+      console.log("Yay got drive update response " + JSON.stringify(driveUpdateResponse))
+
+      // Create 3 sheets: one for the saved internships
+
+      const renameSavedInternshipRequest = {
+        updateSheetProperties: {
+          properties: {
+            title: "Internships",
+            index: 0
+          },
+          fields: "title"
         }
       }
-    }
+      const addFilterSheetRequest = {
+        addSheet: {
+          properties: {
+            title: "Filters",
+            index: 1
+          }
+        }
+      }
 
-    const request = {
-      spreadsheetId,
-      requests: [
-        renameSavedInternshipRequest,
-        addFilterSheetRequest
-      ],
-      responseIncludeGridData: false
-    }
-    const batchUpdateResponse = await gapi.client.sheets.spreadsheets.batchUpdate(request)
-    console.log("Got batch update response: " + JSON.stringify(batchUpdateResponse))
+      const request = {
+        spreadsheetId,
+        requests: [
+          renameSavedInternshipRequest,
+          addFilterSheetRequest
+        ],
+        responseIncludeGridData: false
+      }
+      const batchUpdateResponse = await gapi.client.sheets.spreadsheets.batchUpdate(request)
+      console.log("Got batch update response: " + JSON.stringify(batchUpdateResponse))
 
-    // Save default filter values. TODO replace with Geo browser lookup!
-    this.writeFiltersSheet(
-      new Map([
-        "filter-locations-burlingame",
-        "filter-locations-san-carlos",
-        "filter-locations-san-francisco",
-        "filter-locations-san-mateo"
-      ].map(filterId => [filterId, true] as [string, boolean])),
-      spreadsheetId
-    )
-    return spreadsheetId
+      // Save default filter values. TODO replace with Geo browser lookup!
+      this.writeFiltersSheet(
+        new Map([
+          "filter-locations-burlingame",
+          "filter-locations-san-carlos",
+          "filter-locations-san-francisco",
+          "filter-locations-san-mateo"
+        ].map(filterId => [filterId, true] as [string, boolean])),
+        spreadsheetId
+      )
+      return spreadsheetId
+    } catch (error) {
+      handleError("Sorry, couldn't find or create your personal sheet", error)
+    }
   }
 
   private async readFiltersSheet(): Promise<Map<string, boolean>> {
-    const spreadsheetId = await this.sheetId
-    console.log("Reading filters from " + spreadsheetId)
-    const response = await gapi.client.sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range: "Filters"
-    })
-    return new Map<string, boolean>(
-      (response.result.values || []).map(([filterId, value]) => [filterId, stringToBoolean(value)])
-    )
+    try {
+      const spreadsheetId = await this.sheetId
+      console.log("Reading filters from " + spreadsheetId)
+      const response = await gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: "Filters"
+      })
+      return new Map<string, boolean>(
+        (response.result.values || []).map(([filterId, value]) => [filterId, stringToBoolean(value)])
+      )
+    } catch (error) {
+      handleError("Couldn't read the filters sheet", error)
+    }
   }
 
   private async readInternshipsSheet(): Promise<SavedInternship[]> {
-    const spreadsheetId = await this.sheetId
-    console.log("Reading internships from " + spreadsheetId)
-    const response = await gapi.client.sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range: "Internships!A2:B" + StudentSheet.maxValues
-    })
-    return (response.result.values || []).map(([name, location]) => {
-      return { name, location }
-    })
+    try {
+      const spreadsheetId = await this.sheetId
+      console.log("Reading internships from " + spreadsheetId)
+      const response = await gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: "Internships!A2:B" + StudentSheet.maxValues
+      })
+      return (response.result.values || []).map(([name, location]) => {
+        return { name, location }
+      })
+    } catch (error) {
+      handleError("Couldn't see which internships were saved", error)
+    }
   }
 }
 
@@ -656,8 +678,7 @@ $.getJSON("https://spreadsheets.google.com/feeds/list/1KiBBwtRUjufhhD5FOwC0b37as
     new Internships(data.feed.entry)
     console.log("Finished loading internships")
   } catch (error) {
-    alert("Couldn't load available internships. Sorry.")
-    console.log(error)
+    handleError("Couldn't load available internships. Sorry.", error)
   }
 })
 
@@ -669,39 +690,50 @@ const CLIENT_ID = "246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleuser
 const SCOPES = "email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
 
 function handleClientLoad() {
-  gapi.load("client:auth2", () => {
-    gapi.client.init({
+  gapi.load("client:auth2", initAuth)
+}
+
+async function initAuth() {
+  try {
+    await gapi.client.init({
       apiKey: "AIzaSyBVE4YYgpUF8Kc0gTm_DGEd81zsP4i6P10",
       discoveryDocs: [
         "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest",
         "https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest"
       ],
-      clientId: "246642128409-40focd7nja03tje6l4i21rl1lt9rtn5b.apps.googleusercontent.com",
-      scope: "email profile"
-    }).then(function () {
-      const auth2 = gapi.auth2.getAuthInstance()
-      auth2.isSignedIn.listen(updateSigninStatus)
-      updateSigninStatus(auth2.isSignedIn.get(), true)
+      clientId: CLIENT_ID,
+      scope: SCOPES
     })
-  })
+
+    const auth2 = gapi.auth2.getAuthInstance()
+    auth2.isSignedIn.listen(updateSigninStatus)
+    updateSigninStatus(auth2.isSignedIn.get(), true)
+  } catch (error) {
+    handleError("Could not set up Google client library", error)
+  }
 }
 
 function updateSigninStatus(isSignedIn, onStartup = false) {
-  console.log("updateSigninStatus: isSignedIn is " + isSignedIn + ", onStartup is " + onStartup)
-  if (isSignedIn) {
-    if (!onStartup) {
-      location.reload()
+  try {
+    console.log("updateSigninStatus: isSignedIn is " + isSignedIn + ", onStartup is " + onStartup)
+    if (isSignedIn) {
+      if (!onStartup) {
+        location.reload()
+      } else {
+        let profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile()
+        console.log("Student email: " + profile.getEmail())
+        $("#sign-in-button")
+          .text("Signed in")
+          .removeAttr("onclick")
+          .attr("onclick", "handleSignOutClick()")
+          .attr("title", "Click to sign out")
+        deferredUser.resolve(profile)
+      }
     } else {
-      let profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile()
-      console.log("Student email: " + profile.getEmail())
-      $("#sign-in-button")
-        .text("Signed in")
-        .removeAttr("onclick")
-        .attr("onclick", "handleSignOutClick()")
-        .attr("title", "Click to sign out")
-      deferredUser.resolve(profile)
+      deferredUser.resolve(undefined)
     }
-  } else {
+  } catch (error) {
+    handleError("Failed to get user data from Google", error)
     deferredUser.resolve(undefined)
   }
 }
