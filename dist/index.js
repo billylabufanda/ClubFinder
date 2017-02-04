@@ -351,7 +351,7 @@ class Internships {
             const ss = yield this.studentSheet.promise;
             if (ss) {
                 const sheetId = yield ss.sheetId;
-                $("#saved-internship-link").append(`<a target="_blank" href="https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=0">Saved Internships</a>`);
+                $(".saved-internship-link").append(`<a target="_blank" href="https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=0">Saved Internships</a>`);
             }
         });
     }
@@ -611,11 +611,13 @@ function updateSigninStatus(isSignedIn, onStartup = false) {
                     .text("Signed in")
                     .removeAttr("onclick")
                     .attr("onclick", "handleSignOutClick()")
-                    .attr("title", "Click to sign out");
+                    .attr("title", "Click to sign out")
+                    .show();
                 deferredUser.resolve(profile);
             }
         }
         else {
+            $("#sign-in-button").show();
             deferredUser.resolve(undefined);
         }
     }
@@ -635,5 +637,9 @@ function handleSignOutClick(event) {
 }
 $(document).ready(function () {
     $(".button-collapse").sideNav();
+    $(".collapse").click(function () {
+        // Come with me on a journey beyond time and space. Through the DOM and down the rabbit hole.
+        $(this).parent(".collapsible-body").siblings(".collapsible-header").trigger("click");
+    });
 });
 //# sourceMappingURL=index.js.map

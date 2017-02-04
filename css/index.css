@@ -1,11 +1,45 @@
-#google-signin-button > .abcRioButton {
-  margin: 1em;
+.logo {
+  font-size: 2rem;
 }
 
 @media only screen and (min-width: 993px) {
   .container {
     width: 90% !important;
   }
+}
+
+#sign-in-button {
+  display: none;
+  padding: .8em 1.6em;
+}
+
+.goog {
+  background-color: white;
+  padding: .5em .15em .15em .5em;
+  margin: .5em .5em 0 0;
+  position: relative;
+  top: 0.15em;
+  border-radius: 3em;
+}
+
+.saved-internship-link a {
+  color: white;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+#filters span.count {
+  color: #999;
+  border-radius: .3em;
+  background-color: #eee;
+  padding: .3em .5em;
+  font-size: smaller;
+  margin-left: .5em;
+  font-weight: bold;
+}
+
+#filters label {
+  color: #444;
 }
 
 #InternshipCards .card-reveal .material-icons {
@@ -49,29 +83,7 @@
   color: #536dfe
 }
 
-.goog {
-  background-color: white;
-  padding: .5em .15em .15em .5em;
-  margin: .5em .5em 0 0;
-  position: relative;
-  top: 0.15em;
-  border-radius: 3em;
-}
-
-#saved-internship-link {
-  text-decoration: underline;
-}
-
-#filters span.count {
-  color: #999;
-  border-radius: .3em;
-  background-color: #eee;
-  padding: .3em .5em;
-  font-size: smaller;
-  margin-left: .5em;
-  font-weight: bold;
-}
-
-#filters label {
-  color: #444;
+footer.page-footer {
+  padding: 1em 0 !important;
+  color: white;
 }
