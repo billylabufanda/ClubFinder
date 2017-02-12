@@ -30,10 +30,11 @@ declare function handleError(message: string, error: any): void;
  */
 declare class FilterSet {
     readonly name: string;
+    readonly otherName: string;
     readonly filterClickListener: () => void;
     readonly id: string;
     private readonly filterNameToFilter;
-    constructor(name: string, filterClickListener: () => void);
+    constructor(name: string, otherName: string, filterClickListener: () => void);
     filterNames(): string[];
     filters(): Filter[];
     addFilter(filterName: any): void;
@@ -104,9 +105,10 @@ declare class Internships {
     private readonly filtersByFilterId;
     private readonly studentSheet;
     constructor(dataFeedEntry: any);
+    private withDeferredUser(user);
     findByNameAndLocation(name: string, location: string): Internship | undefined;
     findFilterById(filterId: string): Filter | undefined;
-    onFilterChange(): void;
+    onFilterChange(onLoad?: boolean): void;
     loadSavedFilters(): Promise<void>;
     loadSavedInternships(): Promise<void>;
     showSavedSheetLink(): Promise<void>;

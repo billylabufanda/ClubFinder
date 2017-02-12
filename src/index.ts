@@ -84,7 +84,10 @@ class FilterSet {
   readonly id: string
   private readonly filterNameToFilter: Map<string, Filter>
 
-  constructor(readonly name: string, readonly filterClickListener: () => void) {
+  constructor(
+    readonly name: string,
+    readonly otherName: string,
+    readonly filterClickListener: () => void) {
     this.filterNameToFilter = new Map() // "San Jose" => new Filter("San Jose")
     this.id = name + "Filters"
   }
@@ -149,7 +152,10 @@ class FilterSet {
 class Filter {
   readonly id: string
   private checked: boolean = true
-  constructor(readonly filterSet: FilterSet, readonly name: string) {
+  constructor(
+    readonly filterSet: FilterSet,
+    readonly name: string,
+  ) {
     const safeName = this.name.toLowerCase().replace(/[^a-z0-9 ]+/g, "").trim().replace(/ +/g, "-")
     this.id = "filter-" + this.filterSet.name + "-" + safeName
   }
@@ -169,12 +175,13 @@ class Filter {
 
   render() {
     $("#" + this.filterSet.id).append(
-      `<div class="col s4">
+      `<div class="col s12 l6">
          <input type="checkbox" class="filled-in filter" id="${this.id}" ${this.checked ? `checked="checked"` : ""} />
-         <label for="${this.id}">${this.name}
+         <label class="truncate" for="${this.id}">${this.name}
            <span
              class="count"
-             title="Number of ${this.name} internships with current non-${this.filterSet.name} filters">-</span>
+             title="Number of ${this.name} internships 
+(with currently selected ${this.filterSet.otherName})">-</span> 
          </label>
        </div>`
     )
@@ -326,8 +333,8 @@ class Internships {
     this.internships = dataFeedEntry
       .map(e => new Internship(this, e))
       .filter(internship => internship.approved)
-    this.locations = new FilterSet("locations", () => this.onFilterChange())
-    this.interests = new FilterSet("interests", () => this.onFilterChange())
+    this.locations = new FilterSet("locations", "interests", () => this.onFilterChange())
+    this.interests = new FilterSet("interests", "locations", () => this.onFilterChange())
     this.internships.forEach(internship => {
       internship.locations.forEach(location => this.locations.addFilter(location))
       internship.interests.forEach(interest => this.interests.addFilter(interest))
@@ -340,18 +347,26 @@ class Internships {
     this.interests.render()
     $(".collapsible").collapsible()
     this.internships.map(each => each.render())
-    deferredUser.promise.then(user => {
-      if (user) {
-        const ss = new StudentSheet()
-        this.studentSheet.resolve(ss)
-        this.showSavedSheetLink()
-        this.loadSavedFilters()
+    deferredUser.promise.then(user => this.withDeferredUser(user))
+  }
+
+  private async withDeferredUser(user: User | undefined) {
+    if (user) {
+      const ss = new StudentSheet()
+      this.studentSheet.resolve(ss)
+      await Promise.all([
+        this.showSavedSheetLink(),
+        this.loadSavedFilters(),
         this.loadSavedInternships()
-      } else {
-        this.studentSheet.resolve()
-        this.onFilterChange()
-      } // StudentSheet will call onFilterChange when it loads.
-    })
+      ])
+    } else {
+      this.studentSheet.resolve()
+      await this.onFilterChange()
+    } // StudentSheet will call onFilterChange when it loads.
+
+    // Everything is loaded and we're ready to open the curtains:
+    $(".before-loaded").hide()
+    $(".after-loaded").fadeIn()
   }
 
   findByNameAndLocation(name: string, location: string): Internship | undefined {
@@ -364,7 +379,7 @@ class Internships {
     return this.filtersByFilterId.get(filterId)
   }
 
-  onFilterChange() {
+  onFilterChange(onLoad = false) {
     const selectedLocations = this.locations.selectedFilterNames()
     const selectedInterests = this.interests.selectedFilterNames()
     const selectedLocationInternships: Internship[] = this.internships.filter(internship =>
@@ -391,7 +406,7 @@ class Internships {
     toShow.forEach(ea => ea.show())
     const toHide: Internship[] = this.internships.filter(internship => !toShow.includes(internship))
     toHide.forEach(ea => ea.hide())
-    this.saveFilters()
+    if (!onLoad) this.saveFilters()
   }
 
   async loadSavedFilters() {
@@ -403,7 +418,7 @@ class Internships {
       const filter = this.findFilterById(filterId)
       if (filter != null) { filter.setChecked(checked) }
     })
-    this.onFilterChange()
+    this.onFilterChange(true)
   }
 
   async loadSavedInternships() {
@@ -705,7 +720,7 @@ function updateSigninStatus(isSignedIn, onStartup = false) {
         let profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile()
         console.log("Student email: " + profile.getEmail())
         $("#sign-in-button")
-          .text("Signed in")
+          .text("Sign out")
           .removeAttr("onclick")
           .attr("onclick", "handleSignOutClick()")
           .attr("title", "Click to sign out")
@@ -736,4 +751,5 @@ $(document).ready(function () {
   $(".collapse").click(function () {
     // Come with me on a journey beyond time and space. Through the DOM and down the rabbit hole.
     $(this).parent(".collapsible-body").siblings(".collapsible-header").trigger("click")
-  })})
+  })
+})

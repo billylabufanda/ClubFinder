@@ -69,8 +69,9 @@ Render the UI
  * Holds the types of a given kind of filter, like "location" or "interest"
  */
 class FilterSet {
-    constructor(name, filterClickListener) {
+    constructor(name, otherName, filterClickListener) {
         this.name = name;
+        this.otherName = otherName;
         this.filterClickListener = filterClickListener;
         this.filterNameToFilter = new Map(); // "San Jose" => new Filter("San Jose")
         this.id = name + "Filters";
@@ -142,12 +143,13 @@ class Filter {
         $("#" + this.id).parent().find(".count").text(count);
     }
     render() {
-        $("#" + this.filterSet.id).append(`<div class="col s4">
+        $("#" + this.filterSet.id).append(`<div class="col s12 l6">
          <input type="checkbox" class="filled-in filter" id="${this.id}" ${this.checked ? `checked="checked"` : ""} />
-         <label for="${this.id}">${this.name}
+         <label class="truncate" for="${this.id}">${this.name}
            <span
              class="count"
-             title="Number of ${this.name} internships with current non-${this.filterSet.name} filters">-</span>
+             title="Number of ${this.name} internships 
+(with currently selected ${this.filterSet.otherName})">-</span> 
          </label>
        </div>`);
         $("#" + this.id).click(() => {
@@ -269,8 +271,8 @@ class Internships {
         this.internships = dataFeedEntry
             .map(e => new Internship(this, e))
             .filter(internship => internship.approved);
-        this.locations = new FilterSet("locations", () => this.onFilterChange());
-        this.interests = new FilterSet("interests", () => this.onFilterChange());
+        this.locations = new FilterSet("locations", "interests", () => this.onFilterChange());
+        this.interests = new FilterSet("interests", "locations", () => this.onFilterChange());
         this.internships.forEach(internship => {
             internship.locations.forEach(location => this.locations.addFilter(location));
             internship.interests.forEach(interest => this.interests.addFilter(interest));
@@ -281,18 +283,26 @@ class Internships {
         this.interests.render();
         $(".collapsible").collapsible();
         this.internships.map(each => each.render());
-        deferredUser.promise.then(user => {
+        deferredUser.promise.then(user => this.withDeferredUser(user));
+    }
+    withDeferredUser(user) {
+        return __awaiter(this, void 0, void 0, function* () {
             if (user) {
                 const ss = new StudentSheet();
                 this.studentSheet.resolve(ss);
-                this.showSavedSheetLink();
-                this.loadSavedFilters();
-                this.loadSavedInternships();
+                yield Promise.all([
+                    this.showSavedSheetLink(),
+                    this.loadSavedFilters(),
+                    this.loadSavedInternships()
+                ]);
             }
             else {
                 this.studentSheet.resolve();
-                this.onFilterChange();
+                yield this.onFilterChange();
             } // StudentSheet will call onFilterChange when it loads.
+            // Everything is loaded and we're ready to open the curtains:
+            $(".before-loaded").hide();
+            $(".after-loaded").fadeIn();
         });
     }
     findByNameAndLocation(name, location) {
@@ -301,7 +311,7 @@ class Internships {
     findFilterById(filterId) {
         return this.filtersByFilterId.get(filterId);
     }
-    onFilterChange() {
+    onFilterChange(onLoad = false) {
         const selectedLocations = this.locations.selectedFilterNames();
         const selectedInterests = this.interests.selectedFilterNames();
         const selectedLocationInternships = this.internships.filter(internship => hasAnyOf(internship.locations, selectedLocations));
@@ -322,7 +332,8 @@ class Internships {
         toShow.forEach(ea => ea.show());
         const toHide = this.internships.filter(internship => !toShow.includes(internship));
         toHide.forEach(ea => ea.hide());
-        this.saveFilters();
+        if (!onLoad)
+            this.saveFilters();
     }
     loadSavedFilters() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -336,7 +347,7 @@ class Internships {
                     filter.setChecked(checked);
                 }
             });
-            this.onFilterChange();
+            this.onFilterChange(true);
         });
     }
     loadSavedInternships() {
@@ -608,7 +619,7 @@ function updateSigninStatus(isSignedIn, onStartup = false) {
                 let profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile();
                 console.log("Student email: " + profile.getEmail());
                 $("#sign-in-button")
-                    .text("Signed in")
+                    .text("Sign out")
                     .removeAttr("onclick")
                     .attr("onclick", "handleSignOutClick()")
                     .attr("title", "Click to sign out")

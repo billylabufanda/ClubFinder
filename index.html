@@ -33,11 +33,26 @@
       </ul>
     </div>
   </nav>
-  <div class="container">
+  <div class="container center before-loaded">
+    <div class="preloader-wrapper big active ">
+      <div class="spinner-layer spinner-blue-only">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div>
+        <div class="gap-patch">
+          <div class="circle"></div>
+        </div>
+        <div class="circle-clipper right">
+          <div class="circle"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container after-loaded" style="display:none">
     <!--Internship Filters -->
-    <div class="row">
-      <div class="col s12">
-        <ul id="filters" class="collapsible hoverable popout" data-collapsible="expandable">
+    <div class="row" id="filters">
+      <div class="col s12 m6">
+        <ul class="collapsible hoverable" data-collapsible="expandable">
           <li id="locations">
             <div class="collapsible-header active"><i class="material-icons">location_on</i>Locations</div>
             <div class="collapsible-body">
@@ -47,8 +62,12 @@
               <a class="waves-effect waves-light btn teal lighten-1 collapse right">Done</a>
             </div>
           </li>
+        </ul>
+      </div>
+      <div class="col s12 m6">
+        <ul class="collapsible hoverable" data-collapsible="expandable">
           <li id="interests">
-            <div class="collapsible-header"><i class="material-icons">favorite</i>Interests</div>
+            <div class="collapsible-header active"><i class="material-icons">favorite</i>Interests</div>
             <div class="collapsible-body">
               <div class="row" id="interestsFilters"></div>
               <a class="waves-effect waves-light btn-flat select-all">Select All</a>
