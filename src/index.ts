@@ -154,7 +154,7 @@ class Filter {
   private checked: boolean = true
   constructor(
     readonly filterSet: FilterSet,
-    readonly name: string,
+    readonly name: string
   ) {
     const safeName = this.name.toLowerCase().replace(/[^a-z0-9 ]+/g, "").trim().replace(/ +/g, "-")
     this.id = "filter-" + this.filterSet.name + "-" + safeName
@@ -218,8 +218,8 @@ class Internship {
     this.mySelector = "Internship" + this.id
     try {
       this.name = entry.gsx$nameofcompany.$t
-      this.interests = entry.gsx$fieldofinterest.$t
-      this.locations = entry.gsx$location.$t
+      this.interests = splitAndTrim(entry.gsx$fieldofinterest.$t)
+      this.locations = splitAndTrim(entry.gsx$location.$t)
       this.jobDescription = entry.gsx$jobdescription.$t
       this.deadline = entry.gsx$deadline.$t
       this.contactInfo = entry.gsx$contactinformation.$t
@@ -415,7 +415,9 @@ class Internships {
     toShow.forEach(ea => ea.show())
     const toHide: Internship[] = this.internships.filter(internship => !toShow.includes(internship))
     toHide.forEach(ea => ea.hide())
-    if (!onLoad) this.saveFilters()
+    if (!onLoad) {
+      this.saveFilters()
+    }
   }
 
   async loadSavedFilters() {

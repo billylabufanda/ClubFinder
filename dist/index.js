@@ -170,8 +170,8 @@ class Internship {
         this.mySelector = "Internship" + this.id;
         try {
             this.name = entry.gsx$nameofcompany.$t;
-            this.interests = entry.gsx$fieldofinterest.$t;
-            this.locations = entry.gsx$location.$t;
+            this.interests = splitAndTrim(entry.gsx$fieldofinterest.$t);
+            this.locations = splitAndTrim(entry.gsx$location.$t);
             this.jobDescription = entry.gsx$jobdescription.$t;
             this.deadline = entry.gsx$deadline.$t;
             this.contactInfo = entry.gsx$contactinformation.$t;
@@ -339,8 +339,9 @@ class Internships {
         toShow.forEach(ea => ea.show());
         const toHide = this.internships.filter(internship => !toShow.includes(internship));
         toHide.forEach(ea => ea.hide());
-        if (!onLoad)
+        if (!onLoad) {
             this.saveFilters();
+        }
     }
     loadSavedFilters() {
         return __awaiter(this, void 0, void 0, function* () {
