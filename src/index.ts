@@ -204,9 +204,11 @@ class Internship {
   readonly jobDescription: string
   readonly contactInfo: string
   readonly typeOfWork: string
+  readonly deadline: string
   readonly numberOfStudents: string
   readonly logo: string
   readonly approved: boolean
+  readonly apply: string
   private readonly id: number
   private readonly mySelector: string
   private saved: boolean = false
@@ -216,12 +218,19 @@ class Internship {
     this.mySelector = "Internship" + this.id
     try {
       this.name = entry.gsx$nameofcompany.$t
-      this.locations = splitAndTrim(entry.gsx$location.$t)
-      this.interests = splitAndTrim(entry.gsx$fieldofinterest.$t)
+      this.interests = entry.gsx$fieldofinterest.$t
+      this.locations = entry.gsx$location.$t
       this.jobDescription = entry.gsx$jobdescription.$t
+      this.deadline = entry.gsx$deadline.$t
       this.contactInfo = entry.gsx$contactinformation.$t
-      this.typeOfWork = entry.gsx$typeofwork.$t
-      this.numberOfStudents = entry.gsx$numberofstudents.$t
+      this.apply = entry.gsx$howtoapply.$t
+      // this.name = entry.gsx$nameofcompany.$t
+      // this.locations = splitAndTrim(entry.gsx$location.$t)
+      // this.interests = splitAndTrim(entry.gsx$fieldofinterest.$t)
+      // this.jobDescription = entry.gsx$jobdescription.$t
+      // this.contactInfo = entry.gsx$contactinformation.$t
+      // this.typeOfWork = entry.gsx$typeofwork.$t
+      // this.numberOfStudents = entry.gsx$numberofstudents.$t
       this.logo = entry.gsx$logo.$t
       this.approved = "Approved" === entry.gsx$approval.$t
     } catch (error) {
@@ -264,7 +273,7 @@ class Internship {
             <p><i title="Locations" class="tiny material-icons">location_on</i> ${this.locations.join(", ")}</p>
             <p><i title="Contact Info" class="tiny material-icons">contact_phone</i> ${this.contactInfo}</p>
             <p><i title="Interests" class="tiny material-icons">favorite</i> ${this.interests.join(", ")}</p>
-            <p><i title="Work Involved" class="tiny material-icons">work</i> ${this.typeOfWork}</p>
+            <p><i title="Apply Deadline" class="tiny material-icons">schedule</i> ${this.apply}</p>
             <p><i
               title="How many students can fill position"
               class="tiny material-icons">people</i> ${this.numberOfStudents}</p>
@@ -670,12 +679,13 @@ function stringToBoolean(s: string): boolean {
 
 // Create Internships Array from Sheet
 // tslint:disable-next-line:max-line-length
-$.getJSON("https://spreadsheets.google.com/feeds/list/1KiBBwtRUjufhhD5FOwC0b37asXf48Ug1m8zL5WrHCBA/default/public/values?alt=json", function (data) {
+$.getJSON("https://spreadsheets.google.com/feeds/list/1UcMb3tZpBD7vfFHK3qo2nBePUNzH6HBCejB8BoRCBpc/default/public/values?alt=json", function (data) {
   try {
     new Internships(data.feed.entry)
     console.log("Finished loading internships")
   } catch (error) {
     handleError("Couldn't load available internships. Sorry.", error)
+    console.log(error)
   }
 })
 
