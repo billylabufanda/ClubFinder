@@ -6,6 +6,8 @@
   "scripts": {
     "lint": "tslint --fix src/*.ts",
     "compile": "tsc",
+    "clean": "rimraf dist",
+    "prestart": "rimraf dist",
     "watch": "tsc -w",
     "serve": "serve . -p 8000",
     "start": "run-p watch serve"
@@ -22,6 +24,7 @@
   "homepage": "https://github.com/billylabufanda/billylabufanda.github.io#readme",
   "devDependencies": {
     "npm-run-all": "^4.0.0",
+    "rimraf": "^2.6.1",
     "serve": "^2.4.3",
     "tslint": "^4.3.1",
     "tslint-config-standard": "^2.0.0",
